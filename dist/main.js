@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const rankRoute_1 = __importDefault(require("./routes/rankRoute"));
 require("dotenv").config();
 //Routes
 const authRouter = require("./routes/authRoute.js");
@@ -20,6 +21,7 @@ const jsonParser = body_parser_1.default.json();
 app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use("/auth", jsonParser, authRouter);
 app.use("/payments", jsonParser, paymentsRouter);
+app.use("/rank", rankRoute_1.default);
 //error handling
 app.use(errorController.get404);
 mongoConnect(() => {

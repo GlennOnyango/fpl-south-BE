@@ -1,17 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
-const client = new mongodb_1.MongoClient(process.env.MONGODB_URI);
+const client = new mongodb_1.MongoClient("mongodb+srv://glenntedd:7CenycxUocHa6eEJ@cluster0.hvxfqut.mongodb.net/?retryWrites=true&w=majority");
 client.connect();
 let _db;
 const mongoConnect = (callback) => {
-    client.connect()
-        .then(client => {
+    client
+        .connect()
+        .then((client) => {
         console.log("Connected to MongoDB");
         _db = client.db("fpl");
         callback();
     })
-        .catch(err => {
+        .catch((err) => {
         console.log(err);
         throw err;
     });

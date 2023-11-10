@@ -1,24 +1,24 @@
 import { MongoClient } from "mongodb";
 
+const client = new MongoClient(
+  "mongodb+srv://glenntedd:7CenycxUocHa6eEJ@cluster0.hvxfqut.mongodb.net/?retryWrites=true&w=majority"
+);
 
-const client = new MongoClient(process.env.MONGODB_URI as string)
+client.connect();
+let _db: any;
 
-client.connect()
-let _db:any;
-
-
-
-const mongoConnect = (callback:()=>void) => {
-  client.connect()
-    .then(client => {
+const mongoConnect = (callback: () => void) => {
+  client
+    .connect()
+    .then((client) => {
       console.log("Connected to MongoDB");
       _db = client.db("fpl");
       callback();
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       throw err;
-    });  
+    });
 };
 
 const getDb = () => {

@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import rankRoutes from "./routes/rankRoute";
 
 require("dotenv").config();
 
@@ -22,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/auth", jsonParser, authRouter);
 app.use("/payments", jsonParser, paymentsRouter);
+app.use("/rank", rankRoutes);
 
 //error handling
 app.use(errorController.get404);
