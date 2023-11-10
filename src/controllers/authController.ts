@@ -1,10 +1,10 @@
-const User = require("../models/user");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import User from "../models/user";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const { validationResult } = require("express-validator");
 
-exports.postCreateUser = (req, res, next) => {
+export const postCreateUser = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
@@ -20,19 +20,29 @@ exports.postCreateUser = (req, res, next) => {
 
   const salt = bcrypt.genSaltSync(12);
   const password = bcrypt.hashSync(req.body.password, salt);
+  const approved = false;
+  const admin = false;
 
-  const user = new User(username, teamid, phonenumber, email, password);
+  const user = new User(
+    username,
+    teamid,
+    phonenumber,
+    email,
+    password,
+    approved,
+    admin
+  );
 
   user
     .save()
-    .then((result) => {
+    .then((result: any) => {
       console.log("User created successfully");
       res.status(200).json({
         status: "success",
         data: result,
       });
     })
-    .catch((err) => {
+    .catch((err: any) => {
       console.log(err);
       res.status(400).json({
         status: "error",
@@ -41,7 +51,7 @@ exports.postCreateUser = (req, res, next) => {
     });
 };
 
-exports.postLogin = (req, res, next) => {
+export const postLogin = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors.array());
@@ -54,8 +64,8 @@ exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  User.findByEmail({ email: email })
-    .then(async (user) => {
+  User.findByEmail(email as string)
+    .then(async (user:any) => {
       if (!user) {
         return res.status(401).json({
           status: "error",
@@ -72,13 +82,12 @@ exports.postLogin = (req, res, next) => {
         });
       }
 
-
       const token = jwt.sign(
         {
           email: user.email,
           userId: user._id.toString(),
         },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET as string,
       );
 
       const newUser = {
@@ -94,7 +103,7 @@ exports.postLogin = (req, res, next) => {
         token: token,
       });
     })
-    .catch((err) => {
+    .catch((err:Error) => {
       res.status(400).json({
         status: "error",
         error: err,

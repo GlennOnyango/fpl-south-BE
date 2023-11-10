@@ -1,4 +1,4 @@
-module.exports = (req, res, next) => {
+module.exports = (req:any, res:any, next:any) => {
   if (!req.session.isLoggedIn) {
     return res.redirect("/login");
   }

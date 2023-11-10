@@ -1,5 +1,6 @@
-const express = require("express");
-const bodyParser = require("body-parser");
+import express from "express";
+import bodyParser from "body-parser";
+
 require("dotenv").config();
 
 //Routes
@@ -20,7 +21,7 @@ const jsonParser = bodyParser.json();
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/auth", jsonParser, authRouter);
-app.use("/payments",jsonParser, paymentsRouter);
+app.use("/payments", jsonParser, paymentsRouter);
 
 //error handling
 app.use(errorController.get404);

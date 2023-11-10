@@ -1,16 +1,15 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
 //Controllers
-const authController = require("../controllers/authController");
-const { body } = require("express-validator");
-
+import * as authController from "../controllers/authController";
+import { body } from "express-validator";
 //models
-const User = require("../models/user");
+import User from "../models/user";
 
 router.post(
   "/login",
-  body("email").isEmail().withMessage("Please enter a valid email address"),
+  body("email"). isEmail().withMessage("Please enter a valid email address"),
   body("password").notEmpty().withMessage("Password is required"),
   authController.postLogin
 );
@@ -18,8 +17,8 @@ router.post(
 router.post(
   "/register",
   body("email").isEmail().withMessage("Please enter a valid email address"),
-  body("email").custom((value, { req }) => {
-    return User.findByEmail({ email: value }).then((userDoc) => {
+  body("email").custom((value: any, { req }: any) => {
+    return User.findByEmail(value).then((userDoc: any) => {
       if (userDoc) {
         return Promise.reject("Email address already exists");
       }
@@ -31,7 +30,6 @@ router.post(
   body("userName").notEmpty().withMessage("user name is required"),
   body("teamId").notEmpty().withMessage("team id is required"),
   body("phoneNumber").notEmpty().withMessage("phone number is required"),
-  
 
   authController.postCreateUser
 );

@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const paymentsController = require("../controllers/payments");
-const { body } = require("express-validator");
+
+import * as paymentsController from "../controllers/payments";
+import { body } from "express-validator";
 
 router.post(
   "/",
