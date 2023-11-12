@@ -28,7 +28,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
-const paymentsController = __importStar(require("../controllers/payments"));
+const paymentsController = __importStar(require("../controllers/paymentsController"));
 const express_validator_1 = require("express-validator");
-router.post("/", (0, express_validator_1.body)("email").isEmail().withMessage("Please enter a valid email address"), (0, express_validator_1.body)("firstName").notEmpty().withMessage("First name is required"), (0, express_validator_1.body)("lastName").notEmpty().withMessage("Last name is required"), (0, express_validator_1.body)("phoneNumber").notEmpty().withMessage("Phone number is required"), (0, express_validator_1.body)("amount").notEmpty().withMessage("Amount is required"), paymentsController.postRequestPayment);
+const paymentModel_1 = __importDefault(require("../models/paymentModel"));
+router.post("/pay", (0, express_validator_1.body)("phone").notEmpty().withMessage("Phone number is required"), (0, express_validator_1.body)("amount").notEmpty().withMessage("Amount is required"), (0, express_validator_1.body)("weeks").notEmpty().withMessage("Weeks are required"), (0, express_validator_1.body)("months").notEmpty().withMessage("Months are required"), (0, express_validator_1.body)("mpesaToken").notEmpty().withMessage("Mpesa token is required"), (0, express_validator_1.body)("mpesaToken").custom((value, { req }) => {
+    return paymentModel_1.default.findByMpesaToken(value).then((paymentDoc) => {
+        if (paymentDoc) {
+            return Promise.reject("Mpesa token already exists");
+        }
+    });
+}), paymentsController.postCreatePayment);
 module.exports = router;
