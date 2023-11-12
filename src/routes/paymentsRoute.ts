@@ -22,4 +22,6 @@ router.post(
   paymentsController.postCreatePayment
 );
 
+router.get("/", paymentsController.getPayments);
+
 module.exports = router;

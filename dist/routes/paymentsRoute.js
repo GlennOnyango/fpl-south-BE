@@ -38,4 +38,5 @@ router.post("/pay", (0, express_validator_1.body)("phone").notEmpty().withMessag
         }
     });
 }), paymentsController.postCreatePayment);
+router.get("/", paymentsController.getPayments);
 module.exports = router;
