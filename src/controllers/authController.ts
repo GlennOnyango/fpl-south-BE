@@ -1,8 +1,168 @@
 import User from "../models/user";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
+import WeeksModel from "../models/weeksModel";
 
-const { validationResult } = require("express-validator");
+type weeksObject = {
+  week: number;
+  approved: boolean;
+};
+
+const weeksObjectArray: weeksObject[] = [
+  {
+    week: 1,
+    approved: false,
+  },
+  {
+    week: 2,
+    approved: false,
+  },
+  {
+    week: 3,
+    approved: false,
+  },
+  {
+    week: 4,
+    approved: false,
+  },
+  {
+    week: 5,
+    approved: false,
+  },
+  {
+    week: 6,
+    approved: false,
+  },
+  {
+    week: 7,
+    approved: false,
+  },
+  {
+    week: 8,
+    approved: false,
+  },
+  {
+    week: 9,
+    approved: false,
+  },
+  {
+    week: 10,
+    approved: false,
+  },
+  {
+    week: 11,
+    approved: false,
+  },
+  {
+    week: 12,
+    approved: false,
+  },
+  {
+    week: 13,
+    approved: false,
+  },
+  {
+    week: 14,
+    approved: false,
+  },
+  {
+    week: 15,
+    approved: false,
+  },
+  {
+    week: 16,
+    approved: false,
+  },
+  {
+    week: 17,
+    approved: false,
+  },
+  {
+    week: 18,
+    approved: false,
+  },
+  {
+    week: 19,
+    approved: false,
+  },
+  {
+    week: 20,
+    approved: false,
+  },
+  {
+    week: 21,
+    approved: false,
+  },
+  {
+    week: 22,
+    approved: false,
+  },
+  {
+    week: 23,
+    approved: false,
+  },
+  {
+    week: 24,
+    approved: false,
+  },
+  {
+    week: 25,
+    approved: false,
+  },
+  {
+    week: 26,
+    approved: false,
+  },
+  {
+    week: 27,
+    approved: false,
+  },
+  {
+    week: 28,
+    approved: false,
+  },
+  {
+    week: 29,
+    approved: false,
+  },
+  {
+    week: 30,
+    approved: false,
+  },
+  {
+    week: 31,
+    approved: false,
+  },
+  {
+    week: 32,
+    approved: false,
+  },
+  {
+    week: 33,
+    approved: false,
+  },
+  {
+    week: 34,
+    approved: false,
+  },
+  {
+    week: 35,
+    approved: false,
+  },
+  {
+    week: 36,
+    approved: false,
+  },
+  {
+    week: 37,
+    approved: false,
+  },
+  {
+    week: 38,
+    approved: false,
+  },
+];
 
 export const postCreateUser = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
@@ -36,14 +196,22 @@ export const postCreateUser = (req: any, res: any, next: any) => {
   user
     .save()
     .then((result: any) => {
-      console.log("User created successfully");
-      res.status(200).json({
-        status: "success",
-        data: result,
-      });
+      const weeks = new WeeksModel(weeksObjectArray, result.insertedId);
+      weeks
+        .save()
+        .then((result: any) => {
+          res.status(200).json({
+            status: "success",
+          });
+        })
+        .catch((err: any) => {
+          res.status(400).json({
+            status: "error",
+            error: err,
+          });
+        });
     })
     .catch((err: any) => {
-      console.log(err);
       res.status(400).json({
         status: "error",
         error: err,
@@ -65,7 +233,7 @@ export const postLogin = (req: any, res: any, next: any) => {
   const password = req.body.password;
 
   User.findByEmail(email as string)
-    .then(async (user:any) => {
+    .then(async (user: any) => {
       if (!user) {
         return res.status(401).json({
           status: "error",
@@ -87,7 +255,7 @@ export const postLogin = (req: any, res: any, next: any) => {
           email: user.email,
           userId: user._id.toString(),
         },
-        process.env.JWT_SECRET as string,
+        process.env.JWT_SECRET as string
       );
 
       const newUser = {
@@ -103,7 +271,7 @@ export const postLogin = (req: any, res: any, next: any) => {
         token: token,
       });
     })
-    .catch((err:Error) => {
+    .catch((err: Error) => {
       res.status(400).json({
         status: "error",
         error: err,

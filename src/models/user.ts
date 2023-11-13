@@ -45,9 +45,11 @@ class User {
     return oDB
       .then((result:any) => {
         console.log(result);
+        return result;
       })
       .catch((err:any) => {
         console.log(err);
+        return err;
       });
   }
 
