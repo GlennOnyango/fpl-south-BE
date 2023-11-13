@@ -23,5 +23,6 @@ router.post(
 );
 
 router.get("/", paymentsController.getPayments);
+router.get("/:paymentId", paymentsController.getPaymentsByUserId);
 
 module.exports = router;

@@ -12,11 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPayments = exports.postCreatePayment = void 0;
+exports.editPayment = exports.getPaymentsByUserId = exports.postApprovePayment = exports.getPayments = exports.postCreatePayment = void 0;
 const express_validator_1 = require("express-validator");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const paymentModel_1 = __importDefault(require("../models/paymentModel"));
 const postCreatePayment = (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({
+            status: "error",
+            error: "Unauthorized",
+        });
+    }
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({
@@ -79,3 +85,116 @@ const getPayments = (req, res, next) => {
     }));
 };
 exports.getPayments = getPayments;
+//To check later
+const postApprovePayment = (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({
+            status: "error",
+            error: "Unauthorized",
+        });
+    }
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            status: "error",
+            error: errors.array(),
+        });
+    }
+    const bearerToken = req.headers.authorization.split(" ")[1];
+    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => __awaiter(void 0, void 0, void 0, function* () {
+        if (err) {
+            return res.status(401).json({
+                status: "error",
+                error: err,
+            });
+        }
+        const paymentId = req.body.paymentId;
+        const payment = yield paymentModel_1.default.findById(paymentId);
+        if (!payment) {
+            return res.status(500).json({
+                status: "error",
+                error: "Payment not found",
+            });
+        }
+        payment.approved = true;
+        payment.adminId = decoded.userId;
+        payment.save().then((result) => {
+            res.status(200).json({
+                status: "Payment approved successfully",
+            });
+        });
+        //
+    }));
+};
+exports.postApprovePayment = postApprovePayment;
+const getPaymentsByUserId = (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({
+            status: "error",
+            error: "Unauthorized",
+        });
+    }
+    const bearerToken = req.headers.authorization.split(" ")[1];
+    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => __awaiter(void 0, void 0, void 0, function* () {
+        if (err) {
+            return res.status(401).json({
+                status: "error",
+                error: err,
+            });
+        }
+        const payments = yield paymentModel_1.default.findByUserId(decoded.userId);
+        if (payments.length === 0) {
+            return res.status(500).json({
+                status: "error",
+                error: "No payments found",
+            });
+        }
+        res.status(200).json({
+            status: "success",
+            data: payments,
+        });
+        //
+    }));
+};
+exports.getPaymentsByUserId = getPaymentsByUserId;
+const editPayment = (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({
+            status: "error",
+            error: "Unauthorized",
+        });
+    }
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            status: "error",
+            error: errors.array(),
+        });
+    }
+    const bearerToken = req.headers.authorization.split(" ")[1];
+    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => __awaiter(void 0, void 0, void 0, function* () {
+        if (err) {
+            return res.status(401).json({
+                status: "error",
+                error: err,
+            });
+        }
+        const paymentId = req.body.paymentId;
+        const payment = yield paymentModel_1.default.findById(paymentId);
+        if (!payment) {
+            return res.status(500).json({
+                status: "error",
+                error: "Payment not found",
+            });
+        }
+        payment.approved = true;
+        payment.adminId = decoded.userId;
+        payment.save().then((result) => {
+            res.status(200).json({
+                status: "Payment approved successfully",
+            });
+        });
+        //
+    }));
+};
+exports.editPayment = editPayment;

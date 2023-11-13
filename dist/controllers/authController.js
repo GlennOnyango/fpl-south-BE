@@ -16,9 +16,164 @@ exports.postLogin = exports.postCreateUser = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const { validationResult } = require("express-validator");
+const express_validator_1 = require("express-validator");
+const weeksModel_1 = __importDefault(require("../models/weeksModel"));
+const weeksObjectArray = [
+    {
+        week: 1,
+        approved: false,
+    },
+    {
+        week: 2,
+        approved: false,
+    },
+    {
+        week: 3,
+        approved: false,
+    },
+    {
+        week: 4,
+        approved: false,
+    },
+    {
+        week: 5,
+        approved: false,
+    },
+    {
+        week: 6,
+        approved: false,
+    },
+    {
+        week: 7,
+        approved: false,
+    },
+    {
+        week: 8,
+        approved: false,
+    },
+    {
+        week: 9,
+        approved: false,
+    },
+    {
+        week: 10,
+        approved: false,
+    },
+    {
+        week: 11,
+        approved: false,
+    },
+    {
+        week: 12,
+        approved: false,
+    },
+    {
+        week: 13,
+        approved: false,
+    },
+    {
+        week: 14,
+        approved: false,
+    },
+    {
+        week: 15,
+        approved: false,
+    },
+    {
+        week: 16,
+        approved: false,
+    },
+    {
+        week: 17,
+        approved: false,
+    },
+    {
+        week: 18,
+        approved: false,
+    },
+    {
+        week: 19,
+        approved: false,
+    },
+    {
+        week: 20,
+        approved: false,
+    },
+    {
+        week: 21,
+        approved: false,
+    },
+    {
+        week: 22,
+        approved: false,
+    },
+    {
+        week: 23,
+        approved: false,
+    },
+    {
+        week: 24,
+        approved: false,
+    },
+    {
+        week: 25,
+        approved: false,
+    },
+    {
+        week: 26,
+        approved: false,
+    },
+    {
+        week: 27,
+        approved: false,
+    },
+    {
+        week: 28,
+        approved: false,
+    },
+    {
+        week: 29,
+        approved: false,
+    },
+    {
+        week: 30,
+        approved: false,
+    },
+    {
+        week: 31,
+        approved: false,
+    },
+    {
+        week: 32,
+        approved: false,
+    },
+    {
+        week: 33,
+        approved: false,
+    },
+    {
+        week: 34,
+        approved: false,
+    },
+    {
+        week: 35,
+        approved: false,
+    },
+    {
+        week: 36,
+        approved: false,
+    },
+    {
+        week: 37,
+        approved: false,
+    },
+    {
+        week: 38,
+        approved: false,
+    },
+];
 const postCreateUser = (req, res, next) => {
-    const errors = validationResult(req);
+    const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({
             status: "error",
@@ -37,10 +192,21 @@ const postCreateUser = (req, res, next) => {
     user
         .save()
         .then((result) => {
-        console.log("User created successfully");
-        res.status(200).json({
-            status: "success",
-            data: result,
+        const weeks = new weeksModel_1.default(weeksObjectArray, result.insertedId);
+        weeks
+            .save()
+            .then((result) => {
+            res.status(200).json({
+                status: "success",
+                data: result,
+            });
+        })
+            .catch((err) => {
+            console.log(err);
+            res.status(400).json({
+                status: "error",
+                error: err,
+            });
         });
     })
         .catch((err) => {
@@ -53,7 +219,7 @@ const postCreateUser = (req, res, next) => {
 };
 exports.postCreateUser = postCreateUser;
 const postLogin = (req, res, next) => {
-    const errors = validationResult(req);
+    const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         console.log(errors.array());
         return res.status(422).json({
