@@ -3,9 +3,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import WeeksModel from "../models/weeksModel";
+import MonthsModel from "../models/monthsModel";
 
 type weeksObject = {
   week: number;
+  approved: boolean;
+};
+
+type monthsObject = {
+  month: number;
   approved: boolean;
 };
 
@@ -164,6 +170,57 @@ const weeksObjectArray: weeksObject[] = [
   },
 ];
 
+const monthsObjectArray: monthsObject[] = [
+  {
+    month: 1,
+    approved: false,
+  },
+  {
+    month: 2,
+    approved: false,
+  },
+  {
+    month: 3,
+    approved: false,
+  },
+  {
+    month: 4,
+    approved: false,
+  },
+  {
+    month: 5,
+    approved: false,
+  },
+  {
+    month: 6,
+    approved: false,
+  },
+  {
+    month: 7,
+    approved: false,
+  },
+  {
+    month: 8,
+    approved: false,
+  },
+  {
+    month: 9,
+    approved: false,
+  },
+  {
+    month: 10,
+    approved: false,
+  },
+  {
+    month: 11,
+    approved: false,
+  },
+  {
+    month: 12,
+    approved: false,
+  },
+];
+
 export const postCreateUser = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -199,10 +256,21 @@ export const postCreateUser = (req: any, res: any, next: any) => {
       const weeks = new WeeksModel(weeksObjectArray, result.insertedId);
       weeks
         .save()
-        .then((result: any) => {
-          res.status(200).json({
-            status: "success",
-          });
+        .then((weeks: any) => {
+          const months = new MonthsModel(monthsObjectArray, result.insertedId);
+          months
+            .save()
+            .then((months: any) => {
+              res.status(200).json({
+                status: "success",
+              });
+            })
+            .catch((err: any) => {
+              res.status(400).json({
+                status: "error",
+                error: err,
+              });
+            });
         })
         .catch((err: any) => {
           res.status(400).json({
