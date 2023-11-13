@@ -18,6 +18,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_validator_1 = require("express-validator");
 const weeksModel_1 = __importDefault(require("../models/weeksModel"));
+const monthsModel_1 = __importDefault(require("../models/monthsModel"));
 const weeksObjectArray = [
     {
         week: 1,
@@ -172,6 +173,56 @@ const weeksObjectArray = [
         approved: false,
     },
 ];
+const monthsObjectArray = [
+    {
+        month: 1,
+        approved: false,
+    },
+    {
+        month: 2,
+        approved: false,
+    },
+    {
+        month: 3,
+        approved: false,
+    },
+    {
+        month: 4,
+        approved: false,
+    },
+    {
+        month: 5,
+        approved: false,
+    },
+    {
+        month: 6,
+        approved: false,
+    },
+    {
+        month: 7,
+        approved: false,
+    },
+    {
+        month: 8,
+        approved: false,
+    },
+    {
+        month: 9,
+        approved: false,
+    },
+    {
+        month: 10,
+        approved: false,
+    },
+    {
+        month: 11,
+        approved: false,
+    },
+    {
+        month: 12,
+        approved: false,
+    },
+];
 const postCreateUser = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
@@ -195,14 +246,23 @@ const postCreateUser = (req, res, next) => {
         const weeks = new weeksModel_1.default(weeksObjectArray, result.insertedId);
         weeks
             .save()
-            .then((result) => {
-            res.status(200).json({
-                status: "success",
-                data: result,
+            .then((weeks) => {
+            const months = new monthsModel_1.default(monthsObjectArray, result.insertedId);
+            months
+                .save()
+                .then((months) => {
+                res.status(200).json({
+                    status: "success",
+                });
+            })
+                .catch((err) => {
+                res.status(400).json({
+                    status: "error",
+                    error: err,
+                });
             });
         })
             .catch((err) => {
-            console.log(err);
             res.status(400).json({
                 status: "error",
                 error: err,
@@ -210,7 +270,6 @@ const postCreateUser = (req, res, next) => {
         });
     })
         .catch((err) => {
-        console.log(err);
         res.status(400).json({
             status: "error",
             error: err,

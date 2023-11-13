@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = __importDefault(require("mongodb"));
 const getDb = require("../util/database").getDb;
-class WeeksModel {
-    constructor(weeks, userId, _id) {
-        this.weeks = weeks;
+class MonthsModel {
+    constructor(months, userId, _id) {
+        this.months = months;
         this.userId = userId;
         this._id = _id ? new mongodb_1.default.ObjectId(_id) : null;
     }
@@ -15,12 +15,10 @@ class WeeksModel {
         const db = getDb();
         let oDB;
         if (this._id) {
-            oDB = db
-                .collection("weeks")
-                .updateOne({ _id: this._id }, { $set: this });
+            oDB = db.collection("months").updateOne({ _id: this._id }, { $set: this });
         }
         else {
-            oDB = db.collection("weeks").insertOne(this);
+            oDB = db.collection("months").insertOne(this);
         }
         return oDB
             .then((result) => {
@@ -31,4 +29,4 @@ class WeeksModel {
         });
     }
 }
-exports.default = WeeksModel;
+exports.default = MonthsModel;
