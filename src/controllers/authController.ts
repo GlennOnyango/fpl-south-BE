@@ -322,8 +322,11 @@ export const postLogin = (req: any, res: any, next: any) => {
         {
           email: user.email,
           userId: user._id.toString(),
+          approved: user.approved,
+          admin: user.admin,
         },
-        process.env.JWT_SECRET as string
+        process.env.JWT_SECRET as string,
+        { expiresIn: "1h" }
       );
 
       const newUser = {
@@ -331,6 +334,8 @@ export const postLogin = (req: any, res: any, next: any) => {
         teamId: user.teamid,
         phoneNumber: user.phonenumber,
         email: user.email,
+        approved: user.approved,
+        admin: user.admin,
       };
 
       res.status(200).json({
@@ -390,4 +395,4 @@ export const postCreateAdmin = (req: any, res: any, next: any) => {
         error: err,
       });
     });
-}
+};
