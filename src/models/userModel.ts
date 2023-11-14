@@ -43,12 +43,10 @@ class User {
     }
 
     return oDB
-      .then((result:any) => {
-        console.log(result);
+      .then((result: any) => {
         return result;
       })
-      .catch((err:any) => {
-        console.log(err);
+      .catch((err: any) => {
         return err;
       });
   }
@@ -60,49 +58,64 @@ class User {
       .collection("users")
       .find()
       .toArray()
-      .then((result:User[]) => {
+      .then((result: User[]) => {
         return result;
       })
-      .catch((err:Error) => console.log(err));
+      .catch((err: Error) => console.log(err));
   }
 
-  static findById(_id:string) {
+  static findById(_id: string) {
     const db = getDb();
 
     return db
       .collection("users")
       .find({ _id: new mongodb.ObjectId(_id) })
       .next()
-      .then((result:User) => {
+      .then((result: User) => {
         return result;
       })
-      .catch((err:Error) => console.log(err));
+      .catch((err: Error) => console.log(err));
   }
 
-  static deleteById(_id:string) {
+  static deleteById(_id: string) {
     const db = getDb();
 
     return db
       .collection("users")
       .deleteOne({ _id: new mongodb.ObjectId(_id) })
-      .then((result:User) => {
+      .then((result: User) => {
         console.log("Deleted");
         return result;
       })
-      .catch((err:Error) => console.log(err));
+      .catch((err: Error) => console.log(err));
   }
 
-  static findByEmail(email:string) {
+  static findByEmail(email: string) {
     const db = getDb();
 
     return db
       .collection("users")
-      .find({email:email})
+      .find({ email: email })
       .next()
-      .then((result:User) => {
+      .then((result: User) => {
         return result;
       })
-      .catch((err:Error) => console.log(err));
+      .catch((err: Error) => console.log(err));
+  }
+
+  static findByTeamId(teamid: number) {
+    const db = getDb();
+
+    return db
+      .collection("users")
+      .find({ teamid: teamid })
+      .toArray()
+      .then((result: User[]) => {
+        return result;
+      })
+      .catch((err: Error) => {
+        return err;
+      });
   }
 }
 
