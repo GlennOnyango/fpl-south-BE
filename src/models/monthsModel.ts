@@ -40,6 +40,33 @@ class MonthsModel {
         return err;
       });
   }
+
+  static fetchAll() {
+    const db = getDb();
+    return db
+      .collection("months")
+      .find()
+      .toArray()
+      .then((months: any) => {
+        return months;
+      })
+      .catch((err: any) => {
+        return err;
+      });
+  }
+
+  static fetchByUserId(userId: mongodb.ObjectId) {
+    const db = getDb();
+    return db
+      .collection("months")
+      .findOne({ userId: userId })
+      .then((months: any) => {
+        return months;
+      })
+      .catch((err: any) => {
+        return err;
+      });
+  }
 }
 
 export default MonthsModel;
