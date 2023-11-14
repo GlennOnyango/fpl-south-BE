@@ -28,5 +28,30 @@ class MonthsModel {
             return err;
         });
     }
+    static fetchAll() {
+        const db = getDb();
+        return db
+            .collection("months")
+            .find()
+            .toArray()
+            .then((months) => {
+            return months;
+        })
+            .catch((err) => {
+            return err;
+        });
+    }
+    static fetchByUserId(userId) {
+        const db = getDb();
+        return db
+            .collection("months")
+            .findOne({ userId: userId })
+            .then((months) => {
+            return months;
+        })
+            .catch((err) => {
+            return err;
+        });
+    }
 }
 exports.default = MonthsModel;

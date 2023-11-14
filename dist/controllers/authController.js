@@ -12,8 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postLogin = exports.postCreateUser = void 0;
-const user_1 = __importDefault(require("../models/user"));
+exports.postCreateAdmin = exports.postLogin = exports.postCreateUser = void 0;
+const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_validator_1 = require("express-validator");
@@ -239,7 +239,7 @@ const postCreateUser = (req, res, next) => {
     const password = bcrypt_1.default.hashSync(req.body.password, salt);
     const approved = false;
     const admin = false;
-    const user = new user_1.default(username, teamid, phonenumber, email, password, approved, admin);
+    const user = new userModel_1.default(username, teamid, phonenumber, email, password, approved, admin);
     user
         .save()
         .then((result) => {
@@ -288,7 +288,7 @@ const postLogin = (req, res, next) => {
     }
     const email = req.body.email;
     const password = req.body.password;
-    user_1.default.findByEmail(email)
+    userModel_1.default.findByEmail(email)
         .then((user) => __awaiter(void 0, void 0, void 0, function* () {
         if (!user) {
             return res.status(401).json({
@@ -306,12 +306,16 @@ const postLogin = (req, res, next) => {
         const token = jsonwebtoken_1.default.sign({
             email: user.email,
             userId: user._id.toString(),
-        }, process.env.JWT_SECRET);
+            approved: user.approved,
+            admin: user.admin,
+        }, process.env.JWT_SECRET, { expiresIn: "1h" });
         const newUser = {
             userName: user.username,
             teamId: user.teamid,
             phoneNumber: user.phonenumber,
             email: user.email,
+            approved: user.approved,
+            admin: user.admin,
         };
         res.status(200).json({
             status: "success",
@@ -327,3 +331,36 @@ const postLogin = (req, res, next) => {
     });
 };
 exports.postLogin = postLogin;
+const postCreateAdmin = (req, res, next) => {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        console.log(errors.array());
+        return res.status(422).json({
+            status: "error",
+            error: errors.array(),
+        });
+    }
+    const username = req.body.userName;
+    const teamid = req.body.teamId;
+    const phonenumber = req.body.phoneNumber;
+    const email = req.body.email;
+    const salt = bcrypt_1.default.genSaltSync(12);
+    const password = bcrypt_1.default.hashSync(req.body.password, salt);
+    const approved = true;
+    const admin = true;
+    const user = new userModel_1.default(username, teamid, phonenumber, email, password, approved, admin);
+    user
+        .save()
+        .then((result) => {
+        res.status(200).json({
+            status: "success",
+        });
+    })
+        .catch((err) => {
+        res.status(400).json({
+            status: "error",
+            error: err,
+        });
+    });
+};
+exports.postCreateAdmin = postCreateAdmin;

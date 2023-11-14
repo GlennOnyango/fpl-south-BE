@@ -26,4 +26,4 @@ router.get("/", paymentsController.getPayments);
 router.get("/:paymentId", paymentsController.getPaymentsByUserId);
 router.post("/approve", paymentsController.postApprovePayment);
 
-module.exports = router;
+export default router;

@@ -32,15 +32,37 @@ const router = express_1.default.Router();
 const authController = __importStar(require("../controllers/authController"));
 const express_validator_1 = require("express-validator");
 //models
-const user_1 = __importDefault(require("../models/user"));
+const userModel_1 = __importDefault(require("../models/userModel"));
 router.post("/login", (0, express_validator_1.body)("email").isEmail().withMessage("Please enter a valid email address"), (0, express_validator_1.body)("password").notEmpty().withMessage("Password is required"), authController.postLogin);
 router.post("/register", (0, express_validator_1.body)("email").isEmail().withMessage("Please enter a valid email address"), (0, express_validator_1.body)("email").custom((value, { req }) => {
-    return user_1.default.findByEmail(value).then((userDoc) => {
+    return userModel_1.default.findByEmail(value).then((userDoc) => {
         if (userDoc) {
             return Promise.reject("Email address already exists");
         }
     });
 }), (0, express_validator_1.body)("password")
     .isLength({ min: 5 })
-    .withMessage("Password must be at least 5 characters long"), (0, express_validator_1.body)("userName").notEmpty().withMessage("user name is required"), (0, express_validator_1.body)("teamId").notEmpty().withMessage("team id is required"), (0, express_validator_1.body)("phoneNumber").notEmpty().withMessage("phone number is required"), authController.postCreateUser);
-module.exports = router;
+    .withMessage("Password must be at least 5 characters long"), (0, express_validator_1.body)("userName").notEmpty().withMessage("user name is required"), (0, express_validator_1.body)("teamId").notEmpty().withMessage("team id is required"), (0, express_validator_1.body)("teamId").custom((value, { req }) => {
+    return userModel_1.default.findByTeamId(value).then((userDoc) => {
+        if (userDoc) {
+            return Promise.reject("Team id already exists");
+        }
+    });
+}), (0, express_validator_1.body)("phoneNumber").notEmpty().withMessage("phone number is required"), authController.postCreateUser);
+router.post("/admin", (0, express_validator_1.body)("email").isEmail().withMessage("Please enter a valid email address"), (0, express_validator_1.body)("email").custom((value, { req }) => {
+    return userModel_1.default.findByEmail(value).then((userDoc) => {
+        if (userDoc) {
+            return Promise.reject("Email address already exists");
+        }
+    });
+}), (0, express_validator_1.body)("password")
+    .isLength({ min: 5 })
+    .withMessage("Password must be at least 5 characters long"), (0, express_validator_1.body)("userName").notEmpty().withMessage("user name is required"), (0, express_validator_1.body)("teamId").notEmpty().withMessage("team id is required"), (0, express_validator_1.body)("teamId").custom((value, { req }) => {
+    return userModel_1.default.findByTeamId(value).then((userDoc) => {
+        console.log("check", userDoc);
+        if (userDoc) {
+            return Promise.reject("Team id already exists");
+        }
+    });
+}), (0, express_validator_1.body)("phoneNumber").notEmpty().withMessage("phone number is required"), authController.postCreateAdmin);
+exports.default = router;

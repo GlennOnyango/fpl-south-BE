@@ -238,7 +238,7 @@ export const postCreateUser = (req: any, res: any, next: any) => {
   const salt = bcrypt.genSaltSync(12);
   const password = bcrypt.hashSync(req.body.password, salt);
   const approved = false;
-  const admin = false;
+  const admin = req.body.admin;
 
   const user = new User(
     username,
@@ -352,47 +352,66 @@ export const postLogin = (req: any, res: any, next: any) => {
     });
 };
 
-export const postCreateAdmin = (req: any, res: any, next: any) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log(errors.array());
-    return res.status(422).json({
+export const postApproveUser = (req: any, res: any, next: any) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({
       status: "error",
-      error: errors.array(),
+      error: "Unauthorized",
     });
   }
 
-  const username = req.body.userName;
-  const teamid = req.body.teamId;
-  const phonenumber = req.body.phoneNumber;
-  const email = req.body.email;
+  const userId = req.body.userId;
 
-  const salt = bcrypt.genSaltSync(12);
-  const password = bcrypt.hashSync(req.body.password, salt);
-  const approved = true;
-  const admin = true;
+  const bearerToken = req.headers.authorization.split(" ")[1];
 
-  const user = new User(
-    username,
-    teamid,
-    phonenumber,
-    email,
-    password,
-    approved,
-    admin
+  jwt.verify(
+    bearerToken,
+    process.env.JWT_SECRET as string,
+    (err: any, decoded: any) => {
+      if (err) {
+        return res.status(401).json({
+          status: "error",
+          error: err,
+        });
+      }
+
+      if (!decoded.admin) {
+        return res.status(401).json({
+          status: "error",
+          error: "Unauthorized",
+        });
+      }
+
+      //
+
+      User.findById(userId)
+        .then((user: any) => {
+          user.approved = true;
+          user.approved_by = decoded.userId;
+          user
+            .save()
+            .then((result: any) => {
+              res.status(200).json({
+                status: "User approved successfully",
+              });
+            })
+            .catch((err: any) => {
+              res.status(400).json({
+                status: "error",
+                error: err,
+              });
+            });
+        })
+        .catch((err: any) => {
+          res.status(400).json({
+            status: "error",
+            error: err,
+          });
+        });
+
+      //
+    }
   );
-
-  user
-    .save()
-    .then((result: any) => {
-      res.status(200).json({
-        status: "success",
-      });
-    })
-    .catch((err: any) => {
-      res.status(400).json({
-        status: "error",
-        error: err,
-      });
-    });
 };
+
+

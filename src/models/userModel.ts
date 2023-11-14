@@ -9,6 +9,7 @@ interface User {
   password: string;
   approved: boolean;
   admin: boolean;
+  approved_by?: mongodb.ObjectId | null;
   _id?: mongodb.ObjectId | null;
 }
 
@@ -21,6 +22,7 @@ class User {
     password: string,
     approved: boolean,
     admin: boolean,
+    approved_by?: mongodb.ObjectId | null,
     id?: string
   ) {
     this.username = username;
@@ -30,6 +32,7 @@ class User {
     this.password = password;
     this.approved = approved;
     this.admin = admin;
+    this.approved_by = approved_by ? new mongodb.ObjectId(approved_by) : null;
     this._id = id ? new mongodb.ObjectId(id) : null;
   }
 
@@ -105,11 +108,10 @@ class User {
 
   static findByTeamId(teamid: number) {
     const db = getDb();
-
     return db
       .collection("users")
       .find({ teamid: teamid })
-      .toArray()
+      .next()
       .then((result: User[]) => {
         return result;
       })
@@ -117,6 +119,7 @@ class User {
         return err;
       });
   }
+  
 }
 
 export default User;

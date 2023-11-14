@@ -16,6 +16,8 @@ exports.editPayment = exports.getPaymentsByUserId = exports.postApprovePayment =
 const express_validator_1 = require("express-validator");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const paymentModel_1 = __importDefault(require("../models/paymentModel"));
+const weeksModel_1 = __importDefault(require("../models/weeksModel"));
+const monthsModel_1 = __importDefault(require("../models/monthsModel"));
 const postCreatePayment = (req, res, next) => {
     if (!req.headers.authorization) {
         return res.status(401).json({
@@ -108,6 +110,12 @@ const postApprovePayment = (req, res, next) => {
                 error: err,
             });
         }
+        if (!decoded.admin) {
+            return res.status(401).json({
+                status: "error",
+                error: "Unauthorized",
+            });
+        }
         const paymentId = req.body.paymentId;
         const payment = yield paymentModel_1.default.findById(paymentId);
         if (!payment) {
@@ -118,9 +126,72 @@ const postApprovePayment = (req, res, next) => {
         }
         payment.approved = true;
         payment.adminId = decoded.userId;
-        payment.save().then((result) => {
+        payment
+            .save()
+            .then((result) => {
+            if (payment.weeks.length > 1) {
+                weeksModel_1.default.fetchByUserId(payment.userId)
+                    .then((weeks) => {
+                    payment.weeks.forEach((week) => {
+                        weeks.weeks[week - 1].approved = true;
+                    });
+                    const weeksModel = new weeksModel_1.default(weeks.weeks, payment.userId, weeks._id);
+                    weeksModel
+                        .save()
+                        .then((result) => {
+                        next();
+                    })
+                        .catch((err) => {
+                        res.status(500).json({
+                            status: "error",
+                            error: err,
+                        });
+                    });
+                })
+                    .catch((err) => {
+                    res.status(500).json({
+                        status: "error",
+                        error: err,
+                    });
+                });
+            }
+            if (payment.months.length > 1) {
+                monthsModel_1.default.fetchByUserId(payment.userId)
+                    .then((monthsModelUser) => {
+                    monthsModelUser.map((month) => {
+                        if (payment.months.includes(month.month)) {
+                            month.approved = true;
+                        }
+                        return month;
+                    });
+                    const monthsModel = new monthsModel_1.default(monthsModelUser, payment.userId, monthsModelUser._id);
+                    monthsModel
+                        .save()
+                        .then((result) => {
+                        next();
+                    })
+                        .catch((err) => {
+                        res.status(500).json({
+                            status: "error",
+                            error: err,
+                        });
+                    });
+                })
+                    .catch((err) => {
+                    res.status(500).json({
+                        status: "error",
+                        error: err,
+                    });
+                });
+            }
             res.status(200).json({
                 status: "Payment approved successfully",
+            });
+        })
+            .catch((err) => {
+            res.status(500).json({
+                status: "error",
+                error: err,
             });
         });
         //

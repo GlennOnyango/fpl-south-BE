@@ -5,11 +5,11 @@ import rankRoutes from "./routes/rankRoute";
 require("dotenv").config();
 
 //Routes
-const authRouter = require("./routes/authRoute.js");
-const paymentsRouter = require("./routes/paymentsRoute.js");
+import authRouter from "./routes/authRoute";
+import paymentsRouter from "./routes/paymentsRoute";
 
 //Controllers
-const errorController = require("./controllers/error.js");
+import { get404 } from "./controllers/error";
 
 //database connection
 const mongoConnect = require("./util/database").mongoConnect;
@@ -26,7 +26,7 @@ app.use("/payments", jsonParser, paymentsRouter);
 app.use("/rank", rankRoutes);
 
 //error handling
-app.use(errorController.get404);
+app.use(get404);
 
 mongoConnect(() => {
   app.listen(port, () => {

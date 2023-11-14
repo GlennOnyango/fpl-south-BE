@@ -5,28 +5,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = __importDefault(require("mongodb"));
 const getDb = require("../util/database").getDb;
-class Payment {
-    constructor(phone, weeks, months, amount, mpesaToken, approved, userId, _id, adminId) {
-        this.phone = phone;
-        this.weeks = weeks;
-        this.months = months;
-        this.amount = amount;
-        this.mpesaToken = mpesaToken;
+class User {
+    constructor(username, teamid, phonenumber, email, password, approved, admin, id) {
+        this.username = username;
+        this.teamid = teamid;
+        this.phonenumber = phonenumber;
+        this.email = email;
+        this.password = password;
         this.approved = approved;
-        this.userId = userId;
-        this.adminId = adminId ? new mongodb_1.default.ObjectId(adminId) : null;
-        this._id = _id ? new mongodb_1.default.ObjectId(_id) : null;
+        this.admin = admin;
+        this._id = id ? new mongodb_1.default.ObjectId(id) : null;
     }
     save() {
         const db = getDb();
         let oDB;
         if (this._id) {
-            oDB = db
-                .collection("payments")
-                .updateOne({ _id: this._id }, { $set: this });
+            oDB = db.collection("users").updateOne({ _id: this._id }, { $set: this });
         }
         else {
-            oDB = db.collection("payments").insertOne(this);
+            oDB = db.collection("users").insertOne(this);
         }
         return oDB
             .then((result) => {
@@ -39,32 +36,9 @@ class Payment {
     static fetchAll() {
         const db = getDb();
         return db
-            .collection("payments")
+            .collection("users")
             .find()
             .toArray()
-            .then((result) => {
-            return result;
-        })
-            .catch((err) => console.log(err));
-    }
-    static findByUserId(userId) {
-        const db = getDb();
-        return db
-            .collection("payments")
-            .find({ userId: new mongodb_1.default.ObjectId(userId) })
-            .toArray()
-            .then((result) => {
-            return result;
-        })
-            .catch((err) => console.log(err));
-    }
-    //find by mpesa token
-    static findByMpesaToken(mpesaToken) {
-        const db = getDb();
-        return db
-            .collection("payments")
-            .find({ mpesaToken: mpesaToken })
-            .next()
             .then((result) => {
             return result;
         })
@@ -73,7 +47,7 @@ class Payment {
     static findById(_id) {
         const db = getDb();
         return db
-            .collection("payments")
+            .collection("users")
             .find({ _id: new mongodb_1.default.ObjectId(_id) })
             .next()
             .then((result) => {
@@ -84,7 +58,7 @@ class Payment {
     static deleteById(_id) {
         const db = getDb();
         return db
-            .collection("payments")
+            .collection("users")
             .deleteOne({ _id: new mongodb_1.default.ObjectId(_id) })
             .then((result) => {
             console.log("Deleted");
@@ -92,5 +66,32 @@ class Payment {
         })
             .catch((err) => console.log(err));
     }
+    static findByEmail(email) {
+        const db = getDb();
+        return db
+            .collection("users")
+            .find({ email: email })
+            .next()
+            .then((result) => {
+            return result;
+        })
+            .catch((err) => console.log(err));
+    }
+    static findByTeamId(teamid) {
+        const db = getDb();
+        console.log(teamid);
+        return db
+            .collection("users")
+            .find({ teamid: teamid })
+            .next()
+            .then((result) => {
+            console.log("result", result);
+            return result;
+        })
+            .catch((err) => {
+            console.log("err", err);
+            return err;
+        });
+    }
 }
-exports.default = Payment;
+exports.default = User;

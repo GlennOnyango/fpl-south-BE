@@ -30,5 +30,31 @@ class WeeksModel {
             return err;
         });
     }
+    static fetchAll() {
+        const db = getDb();
+        return db
+            .collection("weeks")
+            .find()
+            .toArray()
+            .then((weeks) => {
+            return weeks;
+        })
+            .catch((err) => {
+            return err;
+        });
+    }
+    static fetchByUserId(userId) {
+        const db = getDb();
+        return db
+            .collection("weeks")
+            .find({ userId: userId })
+            .toArray()
+            .then((weeks) => {
+            return weeks;
+        })
+            .catch((err) => {
+            return err;
+        });
+    }
 }
 exports.default = WeeksModel;
