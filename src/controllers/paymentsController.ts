@@ -132,6 +132,13 @@ export const postApprovePayment = (req: any, res: any, next: any) => {
         });
       }
 
+      if (!decoded.admin) {
+        return res.status(401).json({
+          status: "error",
+          error: "Unauthorized",
+        });
+      }
+
       const paymentId = req.body.paymentId;
 
       const payment = await Payment.findById(paymentId);
@@ -220,7 +227,6 @@ export const postApprovePayment = (req: any, res: any, next: any) => {
           }
           res.status(200).json({
             status: "Payment approved successfully",
-            
           });
         })
         .catch((err: any) => {
