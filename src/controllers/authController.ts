@@ -1,4 +1,4 @@
-import User from "../models/user";
+import User from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
@@ -346,3 +346,48 @@ export const postLogin = (req: any, res: any, next: any) => {
       });
     });
 };
+
+export const postCreateAdmin = (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors.array());
+    return res.status(422).json({
+      status: "error",
+      error: errors.array(),
+    });
+  }
+
+  const username = req.body.userName;
+  const teamid = req.body.teamId;
+  const phonenumber = req.body.phoneNumber;
+  const email = req.body.email;
+
+  const salt = bcrypt.genSaltSync(12);
+  const password = bcrypt.hashSync(req.body.password, salt);
+  const approved = true;
+  const admin = true;
+
+  const user = new User(
+    username,
+    teamid,
+    phonenumber,
+    email,
+    password,
+    approved,
+    admin
+  );
+
+  user
+    .save()
+    .then((result: any) => {
+      res.status(200).json({
+        status: "success",
+      });
+    })
+    .catch((err: any) => {
+      res.status(400).json({
+        status: "error",
+        error: err,
+      });
+    });
+}
