@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import WeeksModel from "../models/weeksModel";
 import MonthsModel from "../models/monthsModel";
-
+import mongoose from "mongoose";
 type weeksObject = {
   week: number;
   approved: boolean;
@@ -221,7 +221,7 @@ const monthsObjectArray: monthsObject[] = [
   },
 ];
 
-export const postCreateUser = (req: any, res: any, next: any) => {
+export const postCreateUser = async (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
@@ -360,14 +360,14 @@ export const postApproveUser = (req: any, res: any, next: any) => {
     });
   }
 
-  const userId = req.body.userId;
+  const teamId = req.body.teamId;
 
   const bearerToken = req.headers.authorization.split(" ")[1];
 
   jwt.verify(
     bearerToken,
     process.env.JWT_SECRET as string,
-    (err: any, decoded: any) => {
+    async (err: any, decoded: any) => {
       if (err) {
         return res.status(401).json({
           status: "error",
@@ -384,34 +384,44 @@ export const postApproveUser = (req: any, res: any, next: any) => {
 
       //
 
-      User.findById(userId)
-        .then((user: any) => {
-          user.approved = true;
-          user.approved_by = decoded.userId;
-          user
-            .save()
-            .then((result: any) => {
-              res.status(200).json({
-                status: "User approved successfully",
-              });
-            })
-            .catch((err: any) => {
-              res.status(400).json({
-                status: "error",
-                error: err,
-              });
-            });
-        })
-        .catch((err: any) => {
-          res.status(400).json({
-            status: "error",
-            error: err,
-          });
-        });
+      const user = await User.findByTeamId(teamId);
 
-      //
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          error: "User not found",
+        });
+      }
+
+      user.approved = true;
+      user.approved_by = new mongoose.Types.ObjectId(decoded.userId);
+
+      const updatedUser = new User(
+        user.username,
+        user.teamid,
+        user.phonenumber,
+        user.email,
+        user.password,
+        user.approved,
+        user.admin,
+        user.approved_by,
+        user._id
+      );
+
+
+      const userChanges = await updatedUser.save();
+
+      if (!userChanges) {
+        return res.status(400).json({
+          status: "error",
+          error: "Error updating user",
+        });
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: userChanges,
+      });
     }
   );
 };
-
-

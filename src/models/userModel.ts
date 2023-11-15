@@ -23,7 +23,7 @@ class User {
     approved: boolean,
     admin: boolean,
     approved_by?: mongodb.ObjectId | null,
-    id?: string
+    id?: mongodb.ObjectId | null
   ) {
     this.username = username;
     this.teamid = teamid;
@@ -32,14 +32,15 @@ class User {
     this.password = password;
     this.approved = approved;
     this.admin = admin;
-    this.approved_by = approved_by ? new mongodb.ObjectId(approved_by) : null;
-    this._id = id ? new mongodb.ObjectId(id) : null;
+    this.approved_by = approved_by ? approved_by : null;
+    this._id = id ? id : null;
   }
 
   save() {
     const db = getDb();
     let oDB;
     if (this._id) {
+      console.log(this._id, this);
       oDB = db.collection("users").updateOne({ _id: this._id }, { $set: this });
     } else {
       oDB = db.collection("users").insertOne(this);
@@ -112,7 +113,7 @@ class User {
       .collection("users")
       .find({ teamid: teamid })
       .next()
-      .then((result: User[]) => {
+      .then((result: User) => {
         return result;
       })
       .catch((err: Error) => {
