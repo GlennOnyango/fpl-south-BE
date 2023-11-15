@@ -15,7 +15,7 @@ import { get404 } from "./controllers/error";
 const mongoConnect = require("./util/database").mongoConnect;
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // create application/json parser
 const jsonParser = bodyParser.json();
