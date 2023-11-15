@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postCreateAdmin = exports.postLogin = exports.postCreateUser = void 0;
+exports.postApproveUser = exports.postLogin = exports.postCreateUser = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -238,7 +238,7 @@ const postCreateUser = (req, res, next) => {
     const salt = bcrypt_1.default.genSaltSync(12);
     const password = bcrypt_1.default.hashSync(req.body.password, salt);
     const approved = false;
-    const admin = false;
+    const admin = req.body.admin;
     const user = new userModel_1.default(username, teamid, phonenumber, email, password, approved, admin);
     user
         .save()
@@ -331,36 +331,54 @@ const postLogin = (req, res, next) => {
     });
 };
 exports.postLogin = postLogin;
-const postCreateAdmin = (req, res, next) => {
-    const errors = (0, express_validator_1.validationResult)(req);
-    if (!errors.isEmpty()) {
-        console.log(errors.array());
-        return res.status(422).json({
+const postApproveUser = (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({
             status: "error",
-            error: errors.array(),
+            error: "Unauthorized",
         });
     }
-    const username = req.body.userName;
-    const teamid = req.body.teamId;
-    const phonenumber = req.body.phoneNumber;
-    const email = req.body.email;
-    const salt = bcrypt_1.default.genSaltSync(12);
-    const password = bcrypt_1.default.hashSync(req.body.password, salt);
-    const approved = true;
-    const admin = true;
-    const user = new userModel_1.default(username, teamid, phonenumber, email, password, approved, admin);
-    user
-        .save()
-        .then((result) => {
-        res.status(200).json({
-            status: "success",
+    const userId = req.body.userId;
+    const bearerToken = req.headers.authorization.split(" ")[1];
+    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({
+                status: "error",
+                error: err,
+            });
+        }
+        if (!decoded.admin) {
+            return res.status(401).json({
+                status: "error",
+                error: "Unauthorized",
+            });
+        }
+        //
+        userModel_1.default.findById(userId)
+            .then((user) => {
+            user.approved = true;
+            user.approved_by = decoded.userId;
+            user
+                .save()
+                .then((result) => {
+                res.status(200).json({
+                    status: "User approved successfully",
+                });
+            })
+                .catch((err) => {
+                res.status(400).json({
+                    status: "error",
+                    error: err,
+                });
+            });
+        })
+            .catch((err) => {
+            res.status(400).json({
+                status: "error",
+                error: err,
+            });
         });
-    })
-        .catch((err) => {
-        res.status(400).json({
-            status: "error",
-            error: err,
-        });
+        //
     });
 };
-exports.postCreateAdmin = postCreateAdmin;
+exports.postApproveUser = postApproveUser;

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = __importDefault(require("mongodb"));
 const getDb = require("../util/database").getDb;
 class User {
-    constructor(username, teamid, phonenumber, email, password, approved, admin, id) {
+    constructor(username, teamid, phonenumber, email, password, approved, admin, approved_by, id) {
         this.username = username;
         this.teamid = teamid;
         this.phonenumber = phonenumber;
@@ -14,6 +14,7 @@ class User {
         this.password = password;
         this.approved = approved;
         this.admin = admin;
+        this.approved_by = approved_by ? new mongodb_1.default.ObjectId(approved_by) : null;
         this._id = id ? new mongodb_1.default.ObjectId(id) : null;
     }
     save() {
@@ -79,17 +80,14 @@ class User {
     }
     static findByTeamId(teamid) {
         const db = getDb();
-        console.log(teamid);
         return db
             .collection("users")
             .find({ teamid: teamid })
             .next()
             .then((result) => {
-            console.log("result", result);
             return result;
         })
             .catch((err) => {
-            console.log("err", err);
             return err;
         });
     }
