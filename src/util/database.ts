@@ -1,8 +1,9 @@
 import { MongoClient } from "mongodb";
 
-const client = new MongoClient(
-  "mongodb+srv://glenntedd:7CenycxUocHa6eEJ@cluster0.hvxfqut.mongodb.net/?retryWrites=true&w=majority"
-);
+
+console.log("Connecting to MongoDB", process.env.MONGODB_URI);
+const client = new MongoClient(process.env.MONGODB_URI!);
+
 
 client.connect();
 let _db: any;
