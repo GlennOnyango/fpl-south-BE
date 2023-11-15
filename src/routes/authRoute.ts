@@ -6,6 +6,7 @@ import * as authController from "../controllers/authController";
 import { body } from "express-validator";
 //models
 import User from "../models/userModel";
+import { checkTeamId } from "../stats/checkTeamId";
 
 router.post(
   "/login",
@@ -29,6 +30,18 @@ router.post(
     .withMessage("Password must be at least 5 characters long"),
   body("userName").notEmpty().withMessage("user name is required"),
   body("teamId").notEmpty().withMessage("team id is required"),
+  body("teamId").custom((value: any, { req }: any) => {
+    return User.findByTeamId(value).then((userDoc: any) => {
+      if (userDoc) {
+        return Promise.reject("Team id already exists");
+      }
+    });
+  }),
+  body("teamId").custom(async (value: any, { req }: any) => {
+    if (!(await checkTeamId(value as number))) {
+      return Promise.reject("Invalid Team ID");
+    }
+  }),
   body("teamId").custom((value: any, { req }: any) => {
     return User.findByTeamId(value).then((userDoc: any) => {
       if (userDoc) {
