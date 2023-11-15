@@ -25,7 +25,7 @@ export const getWeeklyRank = (req: any, res: any, next: any) => {
           error: "No standings found",
         });
       }
-
+ 
       res.status(200).json({
         status: "success",
         data: standings,
