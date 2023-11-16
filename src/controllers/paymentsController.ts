@@ -1,9 +1,8 @@
 import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import Payment from "../models/paymentModel";
-import WeeksModel from "../models/weeksModel";
-import MonthsModel from "../models/monthsModel";
-
+import { updateWeeksByUserId } from "./weeksController";
+import { updateMonthsByUserId } from "./monthsController";
 export const postCreatePayment = (req: any, res: any, next: any) => {
   if (!req.headers.authorization) {
     return res.status(401).json({
@@ -107,7 +106,7 @@ export const postApprovePayment = (req: any, res: any, next: any) => {
   if (!req.headers.authorization) {
     return res.status(401).json({
       status: "error",
-      error: "Unauthorized",
+      error: "Unauthorized headers",
     });
   }
 
@@ -153,95 +152,51 @@ export const postApprovePayment = (req: any, res: any, next: any) => {
       payment.approved = true;
       payment.adminId = decoded.userId;
 
-      payment
-        .save()
-        .then((result: any) => {
-          if (payment.weeks.length > 1) {
-            WeeksModel.fetchByUserId(payment.userId)
-              .then((weeks: any) => {
-                payment.weeks.forEach((week: number) => {
-                  weeks.weeks[week - 1].approved = true;
-                });
+      const PaymentModel = new Payment(
+        payment.phone,
+        payment.weeks,
+        payment.months,
+        payment.amount,
+        payment.mpesaToken,
+        payment.approved,
+        payment.userId,
+        payment._id,
+        payment.adminId
+      );
 
-                const weeksModel = new WeeksModel(
-                  weeks.weeks,
-                  payment.userId,
-                  weeks._id
-                );
+      const paymentResult = await PaymentModel.save();
 
-                weeksModel
-                  .save()
-                  .then((result: any) => {
-                    next();
-                  })
-                  .catch((err: any) => {
-                    res.status(500).json({
-                      status: "error",
-                      error: err,
-                    });
-                  });
-              })
-              .catch((err: any) => {
-                res.status(500).json({
-                  status: "error",
-                  error: err,
-                });
-              });
-          }
+      if (paymentResult.modifiedCount === 1) {
+        const paymentIdUpdate = req.body.paymentId;
 
-          if (payment.months.length > 1) {
-            MonthsModel.fetchByUserId(payment.userId)
-              .then((monthsModelUser: any) => {
-                monthsModelUser.map((month: any) => {
-                  if (payment.months.includes(month.month)) {
-                    month.approved = true;
-                  }
+        const paymentUpdate = await Payment.findById(paymentIdUpdate);
 
-                  return month;
-                });
+        req.body.paymentUpdate = paymentUpdate;
 
-                const monthsModel = new MonthsModel(
-                  monthsModelUser,
-                  payment.userId,
-                  monthsModelUser._id
-                );
+        //update weeks
 
-                monthsModel
-                  .save()
-                  .then((result: any) => {
-                    next();
-                  })
-                  .catch((err: any) => {
-                    res.status(500).json({
-                      status: "error",
-                      error: err,
-                    });
-                  });
-              })
-              .catch((err: any) => {
-                res.status(500).json({
-                  status: "error",
-                  error: err,
-                });
-              });
-          }
-          res.status(200).json({
-            status: "Payment approved successfully",
-          });
-        })
-        .catch((err: any) => {
-          res.status(500).json({
-            status: "error",
-            error: err,
-          });
-        });
+        if (paymentUpdate.weeks.length > 0) {
+          const weekUpdate = updateWeeksByUserId(req, res, next);
+        }
+
+        //update months
+
+        if (paymentUpdate.months.length > 0) {
+          const monthUpdate = updateMonthsByUserId(req, res, next);
+        }
+      }
+      res.status(200).json({
+        status: "Payment approved successfully",
+        week: payment.weeks,
+        month: payment.months,
+      });
 
       //
     }
   );
 };
 
-export const getPaymentsByUserId = (req: any, res: any, next: any) => {
+export const getMyPayments = (req: any, res: any, next: any) => {
   if (!req.headers.authorization) {
     return res.status(401).json({
       status: "error",
@@ -263,6 +218,60 @@ export const getPaymentsByUserId = (req: any, res: any, next: any) => {
       }
 
       const payments = await Payment.findByUserId(decoded.userId);
+
+      if (payments.length === 0) {
+        return res.status(500).json({
+          status: "error",
+          error: "No payments found",
+        });
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: payments,
+      });
+
+      //
+    }
+  );
+};
+
+export const getPaymentsByUserId = (req: any, res: any, next: any) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({
+      status: "error",
+      error: "Unauthorized",
+    });
+  }
+
+  if (!req.params.userId) {
+    return res.status(422).json({
+      status: "error",
+      error: "User id is required",
+    });
+  }
+
+  const bearerToken = req.headers.authorization.split(" ")[1];
+
+  jwt.verify(
+    bearerToken,
+    process.env.JWT_SECRET as string,
+    async (err: any, decoded: any) => {
+      if (err) {
+        return res.status(401).json({
+          status: "error",
+          error: err,
+        });
+      }
+
+      if (!decoded.admin) {
+        return res.status(401).json({
+          status: "error",
+          error: "Unauthorized",
+        });
+      }
+
+      const payments = await Payment.findByUserId(req.params.userId);
 
       if (payments.length === 0) {
         return res.status(500).json({

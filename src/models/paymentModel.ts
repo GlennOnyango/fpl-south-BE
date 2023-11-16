@@ -1,4 +1,5 @@
 import mongodb from "mongodb";
+import mongoose from "mongoose";
 const getDb = require("../util/database").getDb;
 
 interface Payment {
@@ -8,9 +9,9 @@ interface Payment {
   amount: number;
   mpesaToken: string;
   approved: boolean;
-  userId: mongodb.ObjectId | null;
+  userId: string;
   _id?: mongodb.ObjectId | null;
-  adminId?: mongodb.ObjectId | null;
+  adminId?: string | null;
 }
 
 class Payment {
@@ -21,9 +22,9 @@ class Payment {
     amount: number,
     mpesaToken: string,
     approved: boolean,
-    userId: mongodb.ObjectId | null,
+    userId: string,
     _id?: mongodb.ObjectId | null,
-    adminId?: mongodb.ObjectId | null,
+    adminId?: string | null
   ) {
     this.phone = phone;
     this.weeks = weeks;
@@ -32,8 +33,8 @@ class Payment {
     this.mpesaToken = mpesaToken;
     this.approved = approved;
     this.userId = userId;
-    this.adminId = adminId ? new mongodb.ObjectId(adminId) : null;
-    this._id = _id ? new mongodb.ObjectId(_id) : null;
+    this.adminId = adminId ? adminId : null;
+    this._id = _id ? _id : null;
   }
 
   save() {
@@ -71,10 +72,9 @@ class Payment {
 
   static findByUserId(userId: string) {
     const db = getDb();
-
     return db
       .collection("payments")
-      .find({ userId: new mongodb.ObjectId(userId) })
+      .find({ userId: userId })
       .toArray()
       .then((result: Payment[]) => {
         return result;
@@ -101,7 +101,7 @@ class Payment {
 
     return db
       .collection("payments")
-      .find({ _id: new mongodb.ObjectId(_id) })
+      .find({ _id: new mongoose.Types.ObjectId(_id) })
       .next()
       .then((result: Payment) => {
         return result;
@@ -121,7 +121,6 @@ class Payment {
       })
       .catch((err: Error) => console.log(err));
   }
-
 }
 
 export default Payment;
