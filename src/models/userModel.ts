@@ -120,6 +120,20 @@ class User {
         return err;
       });
   }
+
+  static findUsersByTeamId(teamids: string[]) {
+    const db = getDb();
+    return db
+      .collection("users")
+      .find({ teamid: { $in: teamids } })
+      .toArray()
+      .then((result: User[]) => {
+        return result;
+      })
+      .catch((err: Error) => {
+        return err;
+      });
+  }
   
 }
 

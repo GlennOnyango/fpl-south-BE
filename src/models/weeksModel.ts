@@ -69,6 +69,20 @@ class WeeksModel {
         return err;
       });
   }
+
+  static fetchByuserIds(userIds: mongodb.ObjectId[]) {
+    const db = getDb();
+    return db
+      .collection("weeks")
+      .find({ userId: { $in: userIds } })
+      .toArray()
+      .then((weeks: any) => {
+        return weeks;
+      })
+      .catch((err: any) => {
+        return err;
+      });
+  }
 }
 
 export default WeeksModel;

@@ -117,3 +117,10 @@ export async function monthlyStandings() {
   }
   return [];
 }
+
+export async function monthlyTeamId() {
+  const collectedStandings = await monthlyStandings();
+  const userList = collectedStandings.map((e: any) => String(e.entry));
+
+  return userList;
+}

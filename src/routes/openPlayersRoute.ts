@@ -5,13 +5,13 @@ const router = express.Router();
 import * as openPlayersController from "../controllers/openPlayersController";
 
 router.get(
-  "/getOpenPlayers/week/:gameWeek",
-  openPlayersController.getWeeklyRankOpen
+  "/week/:gameWeek",
+  openPlayersController.getWeeklyPaidUser
 );
 
 router.get(
-  "/getOpenPlayers/month/:gameMonth",
-  openPlayersController.getMonthlyRankOpen
+  "/month/:gameMonth",
+  openPlayersController.getMonthlyPaidUser
 );
 
 export default router;

@@ -96,3 +96,10 @@ export async function weeklyStandings() {
   }
   return [];
 }
+
+export async function weeklyTeamId() {
+  const collectedStandings = await rawWeeklyStandings();
+  const userList = collectedStandings.map((e: any) => String(e.entry));
+
+  return userList;
+}
