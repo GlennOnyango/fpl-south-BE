@@ -1,11 +1,6 @@
 import jwt from "jsonwebtoken";
 import MonthsModel from "../models/monthsModel";
 
-type monthsObject = {
-  month: number;
-  approved: boolean;
-};
-
 //get months using userId
 export const getMonthsByUserId = (req: any, res: any, next: any) => {
   const bearerToken = req.headers.authorization.split(" ")[1];
@@ -106,7 +101,7 @@ export const updateMonthsByUserId = (req: any, res: any, next: any) => {
 
       const monthsModel = new MonthsModel(
         monthsModelData.months,
-        paymentUpdate.userId,
+        monthsModelData.userId,
         monthsModelData._id
       );
 
@@ -115,8 +110,13 @@ export const updateMonthsByUserId = (req: any, res: any, next: any) => {
         .then(async (result: any) => {
           //fetch months by userId
           const monthsUpdate = await MonthsModel.fetchByUserId(userId);
-          req.body.months = monthsUpdate;
-          next();
+
+          res.status(200).json({
+            status: "success",
+            months: monthsUpdate.months,
+            weeks: req.body.weeks,
+            paymentUpdate: paymentUpdate,
+          });
         })
         .catch((err: any) => {
           res.status(500).json({

@@ -2,7 +2,6 @@ import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import Payment from "../models/paymentModel";
 import { updateWeeksByUserId } from "./weeksController";
-import { updateMonthsByUserId } from "./monthsController";
 export const postCreatePayment = (req: any, res: any, next: any) => {
   if (!req.headers.authorization) {
     return res.status(401).json({
@@ -176,20 +175,9 @@ export const postApprovePayment = (req: any, res: any, next: any) => {
         //update weeks
 
         if (paymentUpdate.weeks.length > 0) {
-          const weekUpdate = updateWeeksByUserId(req, res, next);
-        }
-
-        //update months
-
-        if (paymentUpdate.months.length > 0) {
-          const monthUpdate = updateMonthsByUserId(req, res, next);
+          updateWeeksByUserId(req, res, next);
         }
       }
-      res.status(200).json({
-        status: "Payment approved successfully",
-        week: payment.weeks,
-        month: payment.months,
-      });
 
       //
     }

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import WeeksModel from "../models/weeksModel";
+import { updateMonthsByUserId } from "./monthsController";
 
 //get weeks using userId
 export const getWeeksByUserId = (req: any, res: any, next: any) => {
@@ -92,7 +93,6 @@ export const updateWeeksByUserId = (req: any, res: any, next: any) => {
 
       //update weeks
       paymentUpdate.weeks.forEach((week: number) => {
-        console.log("week", week, weeksModelData.weeks[week - 1]);
         weeksModelData.weeks[week - 1].approved = true;
       });
 
@@ -108,8 +108,12 @@ export const updateWeeksByUserId = (req: any, res: any, next: any) => {
           //fetch weeks by userId
 
           const weeksUpdate = await WeeksModel.fetchByUserId(userId);
-          req.body.weeks = weeksUpdate;
-          next();
+          req.body.weeks = weeksUpdate.weeks;
+
+          //update months
+          if (paymentUpdate.months.length > 0) {
+            updateMonthsByUserId(req, res, next);
+          }
         })
         .catch((err: any) => {
           res.status(500).json({

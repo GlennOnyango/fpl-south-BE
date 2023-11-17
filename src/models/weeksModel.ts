@@ -19,7 +19,6 @@ class WeeksModel {
     userId: mongodb.ObjectId | null,
     _id?: mongodb.ObjectId | null
   ) {
-    console.log("id", _id);
     this.weeks = weeks;
     this.userId = userId;
     this._id = _id ? _id : null;
@@ -59,7 +58,6 @@ class WeeksModel {
 
   static fetchByUserId(userId: string) {
     const db = getDb();
-    console.log("userId", userId);
     return db
       .collection("weeks")
       .find({ userId: new mongoose.Types.ObjectId(userId) })
