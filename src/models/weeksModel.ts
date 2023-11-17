@@ -1,4 +1,5 @@
 import mongodb from "mongodb";
+import mongoose from "mongoose";
 const getDb = require("../util/database").getDb;
 
 type weeksObject = {
@@ -16,20 +17,18 @@ class WeeksModel {
   constructor(
     weeks: weeksObject[],
     userId: mongodb.ObjectId | null,
-    _id?: mongodb.ObjectId | null,
+    _id?: mongodb.ObjectId | null
   ) {
     this.weeks = weeks;
     this.userId = userId;
-    this._id = _id ? new mongodb.ObjectId(_id) : null;
+    this._id = _id ? _id : null;
   }
 
   save() {
     const db = getDb();
     let oDB;
     if (this._id) {
-      oDB = db
-        .collection("weeks")
-        .updateOne({ _id: this._id }, { $set: this });
+      oDB = db.collection("weeks").updateOne({ _id: this._id }, { $set: this });
     } else {
       oDB = db.collection("weeks").insertOne(this);
     }
@@ -57,12 +56,12 @@ class WeeksModel {
       });
   }
 
-  static fetchByUserId(userId: mongodb.ObjectId) {
+  static fetchByUserId(userId: string) {
     const db = getDb();
     return db
       .collection("weeks")
-      .find({ userId: userId })
-      .toArray()
+      .find({ userId: new mongoose.Types.ObjectId(userId) })
+      .next()
       .then((weeks: any) => {
         return weeks;
       })
@@ -70,7 +69,6 @@ class WeeksModel {
         return err;
       });
   }
-
 }
 
 export default WeeksModel;

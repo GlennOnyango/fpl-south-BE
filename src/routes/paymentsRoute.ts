@@ -23,7 +23,8 @@ router.post(
 );
 
 router.get("/", paymentsController.getPayments);
-router.get("/:paymentId", paymentsController.getPaymentsByUserId);
-router.post("/approve", paymentsController.postApprovePayment);
+router.get("/me", paymentsController.getMyPayments);
+router.get("/:userId", paymentsController.getPaymentsByUserId);
+router.post("/approve/", paymentsController.postApprovePayment);
 
 export default router;

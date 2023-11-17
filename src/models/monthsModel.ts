@@ -1,4 +1,5 @@
 import mongodb from "mongodb";
+import mongoose from "mongoose";
 const getDb = require("../util/database").getDb;
 
 type monthsObject = {
@@ -20,14 +21,16 @@ class MonthsModel {
   ) {
     this.months = months;
     this.userId = userId;
-    this._id = _id ? new mongodb.ObjectId(_id) : null;
+    this._id = _id ? _id : null;
   }
 
   save() {
     const db = getDb();
     let oDB;
     if (this._id) {
-      oDB = db.collection("months").updateOne({ _id: this._id }, { $set: this });
+      oDB = db
+        .collection("months")
+        .updateOne({ _id: this._id }, { $set: this });
     } else {
       oDB = db.collection("months").insertOne(this);
     }
@@ -55,11 +58,11 @@ class MonthsModel {
       });
   }
 
-  static fetchByUserId(userId: mongodb.ObjectId) {
+  static fetchByUserId(userId: string) {
     const db = getDb();
     return db
       .collection("months")
-      .findOne({ userId: userId })
+      .findOne({ userId: new mongoose.Types.ObjectId(userId) })
       .then((months: any) => {
         return months;
       })
