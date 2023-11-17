@@ -70,6 +70,21 @@ class MonthsModel {
         return err;
       });
   }
+
+  static fetchByUserIds(userIds: mongodb.ObjectId[]) {
+    const db = getDb();
+    return db
+      .collection("months")
+      .find({ userId: { $in: userIds } })
+      .toArray()
+      .then((months: any) => {
+        return months;
+      })
+      .catch((err: any) => {
+        return err;
+      });
+  }
+
 }
 
 export default MonthsModel;

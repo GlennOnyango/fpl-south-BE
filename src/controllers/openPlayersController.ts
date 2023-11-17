@@ -1,21 +1,11 @@
 import jwt from "jsonwebtoken";
-import { weeklyStandings } from "../stats/weekly";
+import { weeklyTeamId } from "../stats/weekly";
 import User from "../models/userModel";
-import WeeksModel from "../models/weeksModel";
-import { monthlyStandings } from "../stats/monthly";
+import { monthlyTeamId } from "../stats/monthly";
 import MonthsModel from "../models/monthsModel";
+import WeeksModel from "../models/weeksModel";
 
-type weeksObject = {
-  week: number;
-  approved: boolean;
-};
-
-type monthsObject = {
-  month: number;
-  approved: boolean;
-};
-
-export const getWeeklyRankOpen = (req: any, res: any, next: any) => {
+export const getWeeklyPaidUser = (req: any, res: any, next: any) => {
   const bearerToken = req.headers.authorization.split(" ")[1];
 
   const gameWeek = req.params.gameWeek;
@@ -31,45 +21,24 @@ export const getWeeklyRankOpen = (req: any, res: any, next: any) => {
         });
       }
 
-      const standings = await weeklyStandings();
+      const teamIds = await weeklyTeamId();
 
-      if (standings.length === 0) {
+      if (teamIds.length === 0) {
         return res.status(500).json({
           status: "error",
           error: "No standings found",
         });
       }
+      const registeredUsers = await User.findUsersByTeamId(teamIds);
 
-      const openToPlay = standings.map((userStanding) => {
-        User.findByTeamId(userStanding.id)
-          .then((userDoc: any) => {
-            WeeksModel.fetchByUserId(userDoc._id)
-              .then((weekModelData: any) => {
-                const userWeek = weekModelData.weeks.find(
-                  (week: weeksObject) => {
-                    return week.week === gameWeek;
-                  }
-                );
+      const userIds = registeredUsers.map((user: User) => user._id);
 
-                if (userWeek.approved) {
-                  return userStanding;
-                }
-              })
-              .catch((err: any) => {
-                res.status(500).json({
-                  status: "error",
-                  error: err,
-                  source: "weeksModel",
-                });
-              });
-          })
-          .catch((err: any) => {
-            res.status(500).json({
-              status: "error",
-              error: err,
-              source: "userModel",
-            });
-          });
+      const weekModelArray = await WeeksModel.fetchByuserIds(userIds);
+
+      const openToPlay = weekModelArray.map((weekModel: WeeksModel) => {
+        if (weekModel.weeks[gameWeek - 1].approved) {
+          return weekModel;
+        }
       });
 
       res.status(200).json({
@@ -82,7 +51,7 @@ export const getWeeklyRankOpen = (req: any, res: any, next: any) => {
   );
 };
 
-export const getMonthlyRankOpen = (req: any, res: any, next: any) => {
+export const getMonthlyPaidUser = (req: any, res: any, next: any) => {
   const bearerToken = req.headers.authorization.split(" ")[1];
 
   const gameMonth = req.params.gameMonth;
@@ -98,7 +67,7 @@ export const getMonthlyRankOpen = (req: any, res: any, next: any) => {
         });
       }
 
-      const standings = await monthlyStandings();
+      const standings = await monthlyTeamId();
 
       if (standings.length === 0) {
         return res.status(500).json({
@@ -107,34 +76,16 @@ export const getMonthlyRankOpen = (req: any, res: any, next: any) => {
         });
       }
 
-      const openToPlay = standings.map((userStanding) => {
-        User.findByTeamId(userStanding.id)
-          .then((userDoc: any) => {
-            MonthsModel.fetchByUserId(userDoc._id)
-              .then((monthModelData: any) => {
-                const month = monthModelData.months.find(
-                  (monthObject: monthsObject) => monthObject.month === gameMonth
-                );
+      const registeredUsers = await User.findUsersByTeamId(standings);
 
-                if (month.approved) {
-                  return userStanding;
-                }
-              })
-              .catch((err: any) => {
-                res.status(500).json({
-                  status: "error",
-                  error: err,
-                  source: "monthsModel",
-                });
-              });
-          })
-          .catch((err: any) => {
-            res.status(500).json({
-              status: "error",
-              error: err,
-              source: "userModel",
-            });
-          });
+      const userIds = registeredUsers.map((user: User) => user._id);
+
+      const monthModelArray = await MonthsModel.fetchByUserIds(userIds);
+
+      const openToPlay = monthModelArray.map((monthModel: MonthsModel) => {
+        if (monthModel.months[gameMonth - 1].approved) {
+          return monthModel;
+        }
       });
 
       res.status(200).json({
