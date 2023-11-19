@@ -408,7 +408,6 @@ export const postApproveUser = (req: any, res: any, next: any) => {
         user._id
       );
 
-
       const userChanges = await updatedUser.save();
 
       if (!userChanges) {
@@ -424,4 +423,19 @@ export const postApproveUser = (req: any, res: any, next: any) => {
       });
     }
   );
+};
+
+export const getAuthorizeToken = (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      status: "error",
+      error: errors.array(),
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: "Authorized",
+  });
 };

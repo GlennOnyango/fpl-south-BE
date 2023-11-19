@@ -1,9 +1,10 @@
 import express from "express";
 const router = express.Router();
 
+import jwt from "jsonwebtoken";
 //Controllers
 import * as authController from "../controllers/authController";
-import { body } from "express-validator";
+import { body, header } from "express-validator";
 //models
 import User from "../models/userModel";
 import { checkTeamId } from "../stats/checkTeamId";
@@ -55,5 +56,28 @@ router.post(
 );
 
 router.post("/approve", authController.postApproveUser);
+
+
+router.get(
+  "/",
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const bearerToken = value.split(" ")[1];
+
+    jwt.verify(
+      bearerToken,
+      process.env.JWT_SECRET as string,
+      async (err: any, decoded: any) => {
+        if (err) {
+          return Promise.reject("Invalid token");
+        }
+      }
+    );
+  }),
+
+  authController.getAuthorizeToken
+);
 
 export default router;
