@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.weeklyStandings = void 0;
+exports.weeklyTeamId = exports.weeklyStandings = void 0;
 const constants_1 = require("../constants");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const getCostObject = (eventId, userArray) => __awaiter(void 0, void 0, void 0, function* () {
@@ -92,3 +92,11 @@ function weeklyStandings() {
     });
 }
 exports.weeklyStandings = weeklyStandings;
+function weeklyTeamId() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const collectedStandings = yield rawWeeklyStandings();
+        const userList = collectedStandings.map((e) => String(e.entry));
+        return userList;
+    });
+}
+exports.weeklyTeamId = weeklyTeamId;

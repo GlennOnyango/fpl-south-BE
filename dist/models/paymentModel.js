@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = __importDefault(require("mongodb"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const getDb = require("../util/database").getDb;
 class Payment {
     constructor(phone, weeks, months, amount, mpesaToken, approved, userId, _id, adminId) {
@@ -14,8 +15,8 @@ class Payment {
         this.mpesaToken = mpesaToken;
         this.approved = approved;
         this.userId = userId;
-        this.adminId = adminId ? new mongodb_1.default.ObjectId(adminId) : null;
-        this._id = _id ? new mongodb_1.default.ObjectId(_id) : null;
+        this.adminId = adminId ? adminId : null;
+        this._id = _id ? _id : null;
     }
     save() {
         const db = getDb();
@@ -51,7 +52,7 @@ class Payment {
         const db = getDb();
         return db
             .collection("payments")
-            .find({ userId: new mongodb_1.default.ObjectId(userId) })
+            .find({ userId: userId })
             .toArray()
             .then((result) => {
             return result;
@@ -74,7 +75,7 @@ class Payment {
         const db = getDb();
         return db
             .collection("payments")
-            .find({ _id: new mongodb_1.default.ObjectId(_id) })
+            .find({ _id: new mongoose_1.default.Types.ObjectId(_id) })
             .next()
             .then((result) => {
             return result;

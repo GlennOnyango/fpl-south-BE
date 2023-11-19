@@ -14,13 +14,14 @@ class User {
         this.password = password;
         this.approved = approved;
         this.admin = admin;
-        this.approved_by = approved_by ? new mongodb_1.default.ObjectId(approved_by) : null;
-        this._id = id ? new mongodb_1.default.ObjectId(id) : null;
+        this.approved_by = approved_by ? approved_by : null;
+        this._id = id ? id : null;
     }
     save() {
         const db = getDb();
         let oDB;
         if (this._id) {
+            console.log(this._id, this);
             oDB = db.collection("users").updateOne({ _id: this._id }, { $set: this });
         }
         else {
@@ -84,6 +85,19 @@ class User {
             .collection("users")
             .find({ teamid: teamid })
             .next()
+            .then((result) => {
+            return result;
+        })
+            .catch((err) => {
+            return err;
+        });
+    }
+    static findUsersByTeamId(teamids) {
+        const db = getDb();
+        return db
+            .collection("users")
+            .find({ teamid: { $in: teamids } })
+            .toArray()
             .then((result) => {
             return result;
         })

@@ -19,6 +19,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_validator_1 = require("express-validator");
 const weeksModel_1 = __importDefault(require("../models/weeksModel"));
 const monthsModel_1 = __importDefault(require("../models/monthsModel"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const weeksObjectArray = [
     {
         week: 1,
@@ -223,7 +224,7 @@ const monthsObjectArray = [
         approved: false,
     },
 ];
-const postCreateUser = (req, res, next) => {
+const postCreateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({
@@ -275,7 +276,7 @@ const postCreateUser = (req, res, next) => {
             error: err,
         });
     });
-};
+});
 exports.postCreateUser = postCreateUser;
 const postLogin = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
@@ -338,9 +339,9 @@ const postApproveUser = (req, res, next) => {
             error: "Unauthorized",
         });
     }
-    const userId = req.body.userId;
+    const teamId = req.body.teamId;
     const bearerToken = req.headers.authorization.split(" ")[1];
-    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => {
+    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => __awaiter(void 0, void 0, void 0, function* () {
         if (err) {
             return res.status(401).json({
                 status: "error",
@@ -354,31 +355,27 @@ const postApproveUser = (req, res, next) => {
             });
         }
         //
-        userModel_1.default.findById(userId)
-            .then((user) => {
-            user.approved = true;
-            user.approved_by = decoded.userId;
-            user
-                .save()
-                .then((result) => {
-                res.status(200).json({
-                    status: "User approved successfully",
-                });
-            })
-                .catch((err) => {
-                res.status(400).json({
-                    status: "error",
-                    error: err,
-                });
-            });
-        })
-            .catch((err) => {
-            res.status(400).json({
+        const user = yield userModel_1.default.findByTeamId(teamId);
+        if (!user) {
+            return res.status(404).json({
                 status: "error",
-                error: err,
+                error: "User not found",
             });
+        }
+        user.approved = true;
+        user.approved_by = new mongoose_1.default.Types.ObjectId(decoded.userId);
+        const updatedUser = new userModel_1.default(user.username, user.teamid, user.phonenumber, user.email, user.password, user.approved, user.admin, user.approved_by, user._id);
+        const userChanges = yield updatedUser.save();
+        if (!userChanges) {
+            return res.status(400).json({
+                status: "error",
+                error: "Error updating user",
+            });
+        }
+        res.status(200).json({
+            status: "success",
+            data: userChanges,
         });
-        //
-    });
+    }));
 };
 exports.postApproveUser = postApproveUser;

@@ -10,18 +10,20 @@ require("dotenv").config();
 //Routes
 const authRoute_1 = __importDefault(require("./routes/authRoute"));
 const paymentsRoute_1 = __importDefault(require("./routes/paymentsRoute"));
+const openPlayersRoute_1 = __importDefault(require("./routes/openPlayersRoute"));
 //Controllers
 const error_1 = require("./controllers/error");
 //database connection
 const mongoConnect = require("./util/database").mongoConnect;
 const app = (0, express_1.default)();
-const port = 3000;
+const port = process.env.PORT || 3000;
 // create application/json parser
 const jsonParser = body_parser_1.default.json();
 app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use("/auth", jsonParser, authRoute_1.default);
 app.use("/payments", jsonParser, paymentsRoute_1.default);
 app.use("/rank", rankRoute_1.default);
+app.use("/paid", openPlayersRoute_1.default);
 //error handling
 app.use(error_1.get404);
 mongoConnect(() => {

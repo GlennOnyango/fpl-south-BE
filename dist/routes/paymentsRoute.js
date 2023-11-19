@@ -39,6 +39,7 @@ router.post("/pay", (0, express_validator_1.body)("phone").notEmpty().withMessag
     });
 }), paymentsController.postCreatePayment);
 router.get("/", paymentsController.getPayments);
-router.get("/:paymentId", paymentsController.getPaymentsByUserId);
-router.post("/approve", paymentsController.postApprovePayment);
+router.get("/me", paymentsController.getMyPayments);
+router.get("/:userId", paymentsController.getPaymentsByUserId);
+router.post("/approve/", paymentsController.postApprovePayment);
 exports.default = router;

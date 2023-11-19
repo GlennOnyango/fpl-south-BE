@@ -30,6 +30,6 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 //Controllers
 const openPlayersController = __importStar(require("../controllers/openPlayersController"));
-router.get("/getOpenPlayers/week/:gameWeek", openPlayersController.getWeeklyRankOpen);
-router.get("/getOpenPlayers/month/:gameMonth", openPlayersController.getMonthlyRankOpen);
+router.get("/week/:gameWeek", openPlayersController.getWeeklyPaidUser);
+router.get("/month/:gameMonth", openPlayersController.getMonthlyPaidUser);
 exports.default = router;

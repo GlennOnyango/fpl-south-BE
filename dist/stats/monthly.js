@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.monthlyStandings = void 0;
+exports.monthlyTeamId = exports.monthlyStandings = void 0;
 const constants_1 = require("../constants");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const date = new Date();
@@ -109,3 +109,11 @@ function monthlyStandings() {
     });
 }
 exports.monthlyStandings = monthlyStandings;
+function monthlyTeamId() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const collectedStandings = yield monthlyStandings();
+        const userList = collectedStandings.map((e) => String(e.entry));
+        return userList;
+    });
+}
+exports.monthlyTeamId = monthlyTeamId;
