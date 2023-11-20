@@ -44,6 +44,9 @@ const getCostObject = async (eventIdArray: number[], userList: number[]) => {
 };
 
 const rawMonthlyStandings = async () => {
+  console.log(`${api_url}leagues-classic/264658/standings/?page_new_entries=1&page_standings=1&phase=${
+    months[currentMonth] + 1
+  }`)
   // Get standings
   const standingsCall = await fetch(
     `${api_url}leagues-classic/264658/standings/?page_new_entries=1&page_standings=1&phase=${

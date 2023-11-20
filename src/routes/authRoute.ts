@@ -64,18 +64,17 @@ router.get(
     .notEmpty()
     .withMessage("Authorization header is required"),
   header("Authorization").custom((value: any, { req }: any) => {
-    const bearerToken = value.split(" ")[1];
+    const token = value.split(" ")[1];
+    try {
+      jwt.verify(token, process.env.JWT_SECRET as string);
+      return true;
+    } catch (err) {
+      return false;
+    }
 
-    jwt.verify(
-      bearerToken,
-      process.env.JWT_SECRET as string,
-      async (err: any, decoded: any) => {
-        if (err) {
-          return Promise.reject("Invalid token");
-        }
-      }
-    );
+
   }),
+ 
 
   authController.getAuthorizeToken
 );

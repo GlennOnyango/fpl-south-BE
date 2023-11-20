@@ -37,6 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 //Controllers
 const authController = __importStar(require("../controllers/authController"));
 const express_validator_1 = require("express-validator");
@@ -70,4 +71,16 @@ router.post("/register", (0, express_validator_1.body)("email").isEmail().withMe
     });
 }), (0, express_validator_1.body)("phoneNumber").notEmpty().withMessage("phone number is required"), authController.postCreateUser);
 router.post("/approve", authController.postApproveUser);
+router.get("/", (0, express_validator_1.header)("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"), (0, express_validator_1.header)("Authorization").custom((value, { req }) => {
+    const token = value.split(" ")[1];
+    try {
+        jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+}), authController.getAuthorizeToken);
 exports.default = router;

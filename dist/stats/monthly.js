@@ -45,6 +45,7 @@ const getCostObject = (eventIdArray, userList) => __awaiter(void 0, void 0, void
     })));
 });
 const rawMonthlyStandings = () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(`${constants_1.api_url}leagues-classic/264658/standings/?page_new_entries=1&page_standings=1&phase=${months[currentMonth] + 1}`);
     // Get standings
     const standingsCall = yield (0, node_fetch_1.default)(`${constants_1.api_url}leagues-classic/264658/standings/?page_new_entries=1&page_standings=1&phase=${months[currentMonth] + 1}`, {
         method: "GET",

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postApproveUser = exports.postLogin = exports.postCreateUser = void 0;
+exports.getAuthorizeToken = exports.postApproveUser = exports.postLogin = exports.postCreateUser = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -379,3 +379,17 @@ const postApproveUser = (req, res, next) => {
     }));
 };
 exports.postApproveUser = postApproveUser;
+const getAuthorizeToken = (req, res, next) => {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            status: "error",
+            error: errors.array(),
+        });
+    }
+    res.status(200).json({
+        status: "success",
+        data: "Authorized",
+    });
+};
+exports.getAuthorizeToken = getAuthorizeToken;
