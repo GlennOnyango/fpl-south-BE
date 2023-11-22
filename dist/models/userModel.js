@@ -6,9 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = __importDefault(require("mongodb"));
 const getDb = require("../util/database").getDb;
 class User {
-    constructor(username, teamid, phonenumber, email, password, approved, admin, approved_by, id) {
+    constructor(username, teamid, leagueid, phonenumber, email, password, approved, admin, approved_by, id) {
         this.username = username;
         this.teamid = teamid;
+        this.leagueid = leagueid;
         this.phonenumber = phonenumber;
         this.email = email;
         this.password = password;

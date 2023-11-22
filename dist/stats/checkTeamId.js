@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkTeamId = void 0;
+exports.checkTeamIdWithUserName = exports.checkTeamId = void 0;
 const constants_1 = require("../constants");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 function checkTeamId(teamId) {
@@ -31,3 +31,22 @@ function checkTeamId(teamId) {
     });
 }
 exports.checkTeamId = checkTeamId;
+function checkTeamIdWithUserName(teamId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(teamId);
+        const userData = yield (0, node_fetch_1.default)(`${constants_1.api_url}entry/${teamId}/`, {
+            method: "GET",
+            redirect: "follow",
+        });
+        const userDataText = yield userData.text();
+        const userDataObject = JSON.parse(userDataText);
+        if (userDataObject["id"] == teamId) {
+            const username = userDataObject["player_first_name"] +
+                " " +
+                userDataObject["player_last_name"];
+            return { status: true, username: username };
+        }
+        return { status: false, username: null };
+    });
+}
+exports.checkTeamIdWithUserName = checkTeamIdWithUserName;

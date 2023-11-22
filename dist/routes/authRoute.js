@@ -53,14 +53,16 @@ router.post("/register", (0, express_validator_1.body)("email").isEmail().withMe
     });
 }), (0, express_validator_1.body)("password")
     .isLength({ min: 5 })
-    .withMessage("Password must be at least 5 characters long"), (0, express_validator_1.body)("userName").notEmpty().withMessage("user name is required"), (0, express_validator_1.body)("teamId").notEmpty().withMessage("team id is required"), (0, express_validator_1.body)("teamId").custom((value, { req }) => {
+    .withMessage("Password must be at least 5 characters long"), (0, express_validator_1.body)("teamId").notEmpty().withMessage("team id is required"), (0, express_validator_1.body)("teamId").custom((value, { req }) => {
     return userModel_1.default.findByTeamId(value).then((userDoc) => {
         if (userDoc) {
             return Promise.reject("Team id already exists");
         }
     });
 }), (0, express_validator_1.body)("teamId").custom((value, { req }) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!(yield (0, checkTeamId_1.checkTeamId)(value))) {
+    const { status, username } = yield (0, checkTeamId_1.checkTeamIdWithUserName)(value);
+    if (!status) {
+        req.body.userName = username;
         return Promise.reject("Invalid Team ID");
     }
 })), (0, express_validator_1.body)("teamId").custom((value, { req }) => {

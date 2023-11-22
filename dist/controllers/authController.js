@@ -234,13 +234,14 @@ const postCreateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     }
     const username = req.body.userName;
     const teamid = req.body.teamId;
+    const leagueid = req.body.leagueId;
     const phonenumber = req.body.phoneNumber;
     const email = req.body.email;
     const salt = bcrypt_1.default.genSaltSync(12);
     const password = bcrypt_1.default.hashSync(req.body.password, salt);
     const approved = false;
-    const admin = req.body.admin;
-    const user = new userModel_1.default(username, teamid, phonenumber, email, password, approved, admin);
+    const admin = req.body.userType === "league admin" ? true : false;
+    const user = new userModel_1.default(username, teamid, leagueid, phonenumber, email, password, approved, admin);
     user
         .save()
         .then((result) => {

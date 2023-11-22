@@ -223,10 +223,11 @@ const monthsObjectArray: monthsObject[] = [
 
 export const postCreateUser = async (req: any, res: any, next: any) => {
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
     return res.status(422).json({
       status: "error",
-      error: errors.array(),
+      error: errors.array()[0].msg,
     });
   }
 
@@ -292,10 +293,9 @@ export const postCreateUser = async (req: any, res: any, next: any) => {
 export const postLogin = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors.array());
     return res.status(422).json({
       status: "error",
-      error: errors.array(),
+      error: errors.array()[0].msg,
     });
   }
 
@@ -307,7 +307,7 @@ export const postLogin = (req: any, res: any, next: any) => {
       if (!user) {
         return res.status(401).json({
           status: "error",
-          error: "Invalid email or password",
+          error: "User with this email does not exist",
         });
       }
 
