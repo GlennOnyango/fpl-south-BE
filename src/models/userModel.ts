@@ -25,7 +25,7 @@ class User {
     approved: boolean,
     admin: boolean,
     approved_by?: mongodb.ObjectId | null,
-    id?: mongodb.ObjectId | null
+    _id?: mongodb.ObjectId | null
   ) {
     this.username = username;
     this.teamid = teamid;
@@ -36,14 +36,13 @@ class User {
     this.approved = approved;
     this.admin = admin;
     this.approved_by = approved_by ? approved_by : null;
-    this._id = id ? id : null;
+    this._id = _id ? _id : null;
   }
 
   save() {
     const db = getDb();
     let oDB;
     if (this._id) {
-      console.log(this._id, this);
       oDB = db.collection("users").updateOne({ _id: this._id }, { $set: this });
     } else {
       oDB = db.collection("users").insertOne(this);
@@ -137,7 +136,6 @@ class User {
         return err;
       });
   }
-  
 }
 
 export default User;

@@ -401,6 +401,7 @@ export const postApproveUser = (req: any, res: any, next: any) => {
       const updatedUser = new User(
         user.username,
         user.teamid,
+        user.leagueid,
         user.phonenumber,
         user.email,
         user.password,
@@ -409,7 +410,6 @@ export const postApproveUser = (req: any, res: any, next: any) => {
         user.approved_by,
         user._id
       );
-
       const userChanges = await updatedUser.save();
 
       if (!userChanges) {
