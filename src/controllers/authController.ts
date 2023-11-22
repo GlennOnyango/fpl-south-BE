@@ -232,17 +232,19 @@ export const postCreateUser = async (req: any, res: any, next: any) => {
 
   const username = req.body.userName;
   const teamid = req.body.teamId;
+  const leagueid = req.body.leagueId;
   const phonenumber = req.body.phoneNumber;
   const email = req.body.email;
 
   const salt = bcrypt.genSaltSync(12);
   const password = bcrypt.hashSync(req.body.password, salt);
   const approved = false;
-  const admin = req.body.admin;
+  const admin = req.body.userType === "league admin" ? true : false;
 
   const user = new User(
     username,
     teamid,
+    leagueid,
     phonenumber,
     email,
     password,

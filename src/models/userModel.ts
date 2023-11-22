@@ -4,6 +4,7 @@ const getDb = require("../util/database").getDb;
 interface User {
   username: string;
   teamid: number;
+  leagueid?: number;
   phonenumber: number;
   email: string;
   password: string;
@@ -17,6 +18,7 @@ class User {
   constructor(
     username: string,
     teamid: number,
+    leagueid: number,
     phonenumber: number,
     email: string,
     password: string,
@@ -27,6 +29,7 @@ class User {
   ) {
     this.username = username;
     this.teamid = teamid;
+    this.leagueid = leagueid;
     this.phonenumber = phonenumber;
     this.email = email;
     this.password = password;
