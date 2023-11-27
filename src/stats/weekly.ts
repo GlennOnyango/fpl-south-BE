@@ -28,7 +28,7 @@ const getCostObject = async (eventId: number, userArray: number[]) => {
   );
 };
 
-const getBootStrap = async () => {
+export const getBootStrap = async () => {
   let eventCurrent = 0;
   const bootStrap = await fetch(`${api_url}bootstrap-static/`, {
     method: "GET",
@@ -87,6 +87,7 @@ export async function weeklyStandings() {
         entry: entry,
         entry_name: entry_name,
         cost: cost,
+        weekNo: eventCurrent,
       };
     });
 
