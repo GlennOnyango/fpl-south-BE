@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import Payment from "../models/paymentModel";
 import { updateWeeksByUserId } from "./weeksController";
+import { getBootStrap } from "../stats/weekly";
 export const postCreatePayment = (req: any, res: any, next: any) => {
   if (!req.headers.authorization) {
     return res.status(401).json({
@@ -328,6 +329,41 @@ export const editPayment = (req: any, res: any, next: any) => {
       });
 
       //
+    }
+  );
+};
+
+
+export const getOpenWeeks = (req: any, res: any, next: any) => {
+  const bearerToken = req.headers.authorization.split(" ")[1];
+
+  jwt.verify(
+    bearerToken,
+    process.env.JWT_SECRET as string,
+    async (err: any, decoded: any) => {
+      if (err) {
+        return res.status(401).json({
+          status: "error",
+          error: err,
+        });
+      }
+
+      const openWeek = await getBootStrap();
+      const openWeeks: any[] = [];
+
+      for (let i = 1; i == 38; i++) {
+
+        if (i <= openWeek) {
+          openWeeks.push({weeknumber: i, open: false});
+        }
+        openWeeks.push({weeknumber: i, open: true});
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: openWeeks,
+      });
+
     }
   );
 };

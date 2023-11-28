@@ -8,6 +8,7 @@ require("dotenv").config();
 import authRouter from "./routes/authRoute";
 import paymentsRouter from "./routes/paymentsRoute";
 import playerRouter from "./routes/openPlayersRoute";
+import week from "./routes/weeksRoute";
 //Controllers
 import { get404 } from "./controllers/error";
 
@@ -24,7 +25,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/auth", jsonParser, authRouter);
 app.use("/payments", jsonParser, paymentsRouter);
 app.use("/rank", rankRoutes);
-app.use("/paid", playerRouter )
+app.use("/paid", playerRouter );
+app.use("/weeks",week)
 
 //error handling
 app.use(get404);

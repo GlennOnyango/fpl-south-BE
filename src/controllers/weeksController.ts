@@ -38,6 +38,14 @@ export const getWeeksByUserId = (req: any, res: any, next: any) => {
 };
 
 export const getMyWeeks = (req: any, res: any, next: any) => {
+  
+  if (!req.headers.authorization) {
+    return res.status(401).json({
+      status: "error",
+      error: "Unauthorized",
+    });
+  }
+
   const bearerToken = req.headers.authorization.split(" ")[1];
 
   jwt.verify(
@@ -68,6 +76,7 @@ export const getMyWeeks = (req: any, res: any, next: any) => {
     }
   );
 };
+
 
 //update weeks using userId
 export const updateWeeksByUserId = (req: any, res: any, next: any) => {

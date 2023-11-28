@@ -44,9 +44,6 @@ const getCostObject = async (eventIdArray: number[], userList: number[]) => {
 };
 
 const rawMonthlyStandings = async () => {
-  console.log(`${api_url}leagues-classic/264658/standings/?page_new_entries=1&page_standings=1&phase=${
-    months[currentMonth] + 1
-  }`)
   // Get standings
   const standingsCall = await fetch(
     `${api_url}leagues-classic/264658/standings/?page_new_entries=1&page_standings=1&phase=${
@@ -64,7 +61,7 @@ const rawMonthlyStandings = async () => {
   return collectedStandings;
 };
 
-const leagueWeeks = async () => {
+export const leagueWeeks = async () => {
   let eventCurrent: number[] = [];
   const bootStrap = await fetch(`${api_url}bootstrap-static/`, {
     method: "GET",
@@ -100,11 +97,11 @@ export async function monthlyStandings() {
       const cost = e.cost;
       const index = collectedStandings.findIndex((e: any) => e.entry === entry);
       const entry_name = collectedStandings[index].entry_name;
-      const event_total = collectedStandings[index].event_total;
+      const total = collectedStandings[index].total;
       const player_name = collectedStandings[index].player_name;
       return {
         id: entry,
-        event_total: event_total - cost,
+        event_total: total - cost,
         player_name: player_name,
         entry: entry,
         entry_name: entry_name,

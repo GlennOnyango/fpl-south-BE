@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import { weeklyStandings, getBootStrap } from "../stats/weekly";
-import { monthlyStandings } from "../stats/monthly";
+import { leagueWeeks, monthlyStandings } from "../stats/monthly";
 
 export const getWeeklyRank = (req: any, res: any, next: any) => {
   const bearerToken = req.headers.authorization.split(" ")[1];
@@ -53,7 +53,10 @@ export const getMonthlyRank = (req: any, res: any, next: any) => {
         });
       }
 
+      const eventWeeks = await leagueWeeks();
       const standings = await monthlyStandings();
+
+
 
       if (standings.length === 0) {
         return res.status(500).json({
@@ -65,6 +68,7 @@ export const getMonthlyRank = (req: any, res: any, next: any) => {
       res.status(200).json({
         status: "success",
         data: standings,
+        event: eventWeeks,
       });
 
       //
