@@ -56,7 +56,24 @@ router.post(
   authController.postCreateUser
 );
 
-router.post("/approve", authController.postApproveUser);
+router.post(
+  "/approve",
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const token = value.split(" ")[1];
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
+      req.admin = decoded.admin;
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }),
+  authController.postApproveUser
+);
 
 router.get(
   "/",
