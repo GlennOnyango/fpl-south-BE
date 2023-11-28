@@ -1,8 +1,9 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 const router = express.Router();
 
 import * as paymentsController from "../controllers/paymentsController";
-import { body } from "express-validator";
+import { body, header } from "express-validator";
 import Payment from "../models/paymentModel";
 
 router.post(
@@ -19,12 +20,92 @@ router.post(
       }
     });
   }),
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const token = value.split(" ")[1];
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }),
   paymentsController.postCreatePayment
 );
+router.post(
+  "/approve/",
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const token = value.split(" ")[1];
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
+      req.admin = decoded.admin;
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }),
+  paymentsController.postApprovePayment
+);
 
-router.get("/", paymentsController.getPayments);
-router.get("/me", paymentsController.getMyPayments);
-router.get("/:userId", paymentsController.getPaymentsByUserId);
-router.post("/approve/", paymentsController.postApprovePayment);
+router.get(
+  "/",
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const token = value.split(" ")[1];
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }),
+  paymentsController.getPayments
+);
+router.get(
+  "/me",
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const token = value.split(" ")[1];
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
+      req.admin = decoded.admin;
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }),
+  paymentsController.getMyPayments
+);
+router.get(
+  "/:userId",
+  header("Authorization")
+    .notEmpty()
+    .withMessage("Authorization header is required"),
+  header("Authorization").custom((value: any, { req }: any) => {
+    const token = value.split(" ")[1];
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
+      req.admin = decoded.admin;
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }),
+  paymentsController.getPaymentsByUserId
+);
 
 export default router;

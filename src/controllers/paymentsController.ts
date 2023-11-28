@@ -1,369 +1,218 @@
 import { validationResult } from "express-validator";
-import jwt from "jsonwebtoken";
 import Payment from "../models/paymentModel";
 import { updateWeeksByUserId } from "./weeksController";
-import { getBootStrap } from "../stats/weekly";
-export const postCreatePayment = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({
-      status: "error",
-      error: "Unauthorized",
-    });
-  }
 
+export const postCreatePayment = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
       status: "error",
-      error: errors.array(),
+      error: errors.array()[0].msg,
     });
   }
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const amount = req.body.amount;
+  const phone = req.body.phone;
+  const weeks: number[] = req.body.weeks;
+  const months: number[] = req.body.months;
+  const mpesaToken = req.body.mpesaToken;
+  const approved = false;
+  const userId = req.userId;
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
-
-      const amount = req.body.amount;
-      const phone = req.body.phone;
-      const weeks: number[] = req.body.weeks;
-      const months: number[] = req.body.months;
-      const mpesaToken = req.body.mpesaToken;
-      const approved = false;
-      const userId = decoded.userId;
-
-      const payment = new Payment(
-        phone,
-        weeks,
-        months,
-        amount,
-        mpesaToken,
-        approved,
-        userId
-      );
-
-      payment.save().then((result: any) => {
-        res.status(200).json({
-          status: "Payment created successfully",
-        });
-      });
-
-      //
-    }
+  const payment = new Payment(
+    phone,
+    weeks,
+    months,
+    amount,
+    mpesaToken,
+    approved,
+    userId
   );
+
+  payment.save().then((result: any) => {
+    res.status(200).json({
+      status: "Payment created successfully",
+    });
+  });
 };
 
-export const getPayments = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({
+export const getPayments = async (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
       status: "error",
-      error: "Unauthorized",
+      error: errors.array()[0].msg,
     });
   }
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const payments = await Payment.fetchAll();
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
+  if (payments.length === 0) {
+    return res.status(500).json({
+      status: "error",
+      error: "No payments found",
+    });
+  }
 
-      const payments = await Payment.fetchAll();
-
-      if (payments.length === 0) {
-        return res.status(500).json({
-          status: "error",
-          error: "No payments found",
-        });
-      }
-
-      res.status(200).json({
-        status: "success",
-        data: payments,
-      });
-
-      //
-    }
-  );
+  res.status(200).json({
+    status: "success",
+    data: payments,
+  });
 };
 
 //To check later
-export const postApprovePayment = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({
-      status: "error",
-      error: "Unauthorized headers",
-    });
-  }
-
+export const postApprovePayment = async (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
       status: "error",
-      error: errors.array(),
+      error: errors.array()[0].msg,
     });
   }
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const admin = req.admin;
+  const userId = req.userId;
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
-
-      if (!decoded.admin) {
-        return res.status(401).json({
-          status: "error",
-          error: "Unauthorized",
-        });
-      }
-
-      const paymentId = req.body.paymentId;
-
-      const payment = await Payment.findById(paymentId);
-
-      if (!payment) {
-        return res.status(500).json({
-          status: "error",
-          error: "Payment not found",
-        });
-      }
-
-      payment.approved = true;
-      payment.adminId = decoded.userId;
-
-      const PaymentModel = new Payment(
-        payment.phone,
-        payment.weeks,
-        payment.months,
-        payment.amount,
-        payment.mpesaToken,
-        payment.approved,
-        payment.userId,
-        payment._id,
-        payment.adminId
-      );
-
-      const paymentResult = await PaymentModel.save();
-
-      if (paymentResult.modifiedCount === 1) {
-        const paymentIdUpdate = req.body.paymentId;
-
-        const paymentUpdate = await Payment.findById(paymentIdUpdate);
-
-        req.body.paymentUpdate = paymentUpdate;
-
-        //update weeks
-
-        if (paymentUpdate.weeks.length > 0) {
-          updateWeeksByUserId(req, res, next);
-        }
-      }
-
-      //
-    }
-  );
-};
-
-export const getMyPayments = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
+  if (admin) {
     return res.status(401).json({
       status: "error",
       error: "Unauthorized",
     });
   }
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const paymentId = req.body.paymentId;
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
+  const payment = await Payment.findById(paymentId);
 
-      const payments = await Payment.findByUserId(decoded.userId);
+  if (!payment) {
+    return res.status(500).json({
+      status: "error",
+      error: "Payment not found",
+    });
+  }
 
-      if (payments.length === 0) {
-        return res.status(500).json({
-          status: "error",
-          error: "No payments found",
-        });
-      }
+  payment.approved = true;
+  payment.adminId = userId;
 
-      res.status(200).json({
-        status: "success",
-        data: payments,
-      });
-
-      //
-    }
+  const PaymentModel = new Payment(
+    payment.phone,
+    payment.weeks,
+    payment.months,
+    payment.amount,
+    payment.mpesaToken,
+    payment.approved,
+    payment.userId,
+    payment._id,
+    payment.adminId
   );
+
+  const paymentResult = await PaymentModel.save();
+
+  if (paymentResult.modifiedCount === 1) {
+    const paymentIdUpdate = req.body.paymentId;
+
+    const paymentUpdate = await Payment.findById(paymentIdUpdate);
+
+    req.body.paymentUpdate = paymentUpdate;
+
+    //update weeks
+
+    if (paymentUpdate.weeks.length > 0) {
+      updateWeeksByUserId(req, res, next);
+    }
+  }
 };
 
-export const getPaymentsByUserId = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({
-      status: "error",
-      error: "Unauthorized",
-    });
-  }
-
-  if (!req.params.userId) {
-    return res.status(422).json({
-      status: "error",
-      error: "User id is required",
-    });
-  }
-
-  const bearerToken = req.headers.authorization.split(" ")[1];
-
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
-
-      if (!decoded.admin) {
-        return res.status(401).json({
-          status: "error",
-          error: "Unauthorized",
-        });
-      }
-
-      const payments = await Payment.findByUserId(req.params.userId);
-
-      if (payments.length === 0) {
-        return res.status(500).json({
-          status: "error",
-          error: "No payments found",
-        });
-      }
-
-      res.status(200).json({
-        status: "success",
-        data: payments,
-      });
-
-      //
-    }
-  );
-};
-
-export const editPayment = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({
-      status: "error",
-      error: "Unauthorized",
-    });
-  }
-
+export const getMyPayments = async (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
       status: "error",
-      error: errors.array(),
+      error: errors.array()[0].msg,
     });
   }
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const userId = req.userId;
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
+  const payments = await Payment.findByUserId(userId);
 
-      const paymentId = req.body.paymentId;
+  if (payments.length === 0) {
+    return res.status(500).json({
+      status: "error",
+      error: "No payments found",
+    });
+  }
 
-      const payment = await Payment.findById(paymentId);
-
-      if (!payment) {
-        return res.status(500).json({
-          status: "error",
-          error: "Payment not found",
-        });
-      }
-
-      payment.approved = true;
-      payment.adminId = decoded.userId;
-
-      payment.save().then((result: any) => {
-        res.status(200).json({
-          status: "Payment approved successfully",
-        });
-      });
-
-      //
-    }
-  );
+  res.status(200).json({
+    status: "success",
+    data: payments,
+  });
 };
 
+export const getPaymentsByUserId = async(req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      status: "error",
+      error: errors.array()[0].msg,
+    });
+  }
 
-export const getOpenWeeks = (req: any, res: any, next: any) => {
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const userId = req.userId;
+  const admin = req.admin;
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
+  if (admin) {
+    return res.status(401).json({
+      status: "error",
+      error: "Unauthorized",
+    });
+  }
 
-      const openWeek = await getBootStrap();
-      const openWeeks: any[] = [];
+  const payments = await Payment.findByUserId(userId);
 
-      for (let i = 1; i == 38; i++) {
+  if (payments.length === 0) {
+    return res.status(500).json({
+      status: "error",
+      error: "No payments found",
+    });
+  }
 
-        if (i <= openWeek) {
-          openWeeks.push({weeknumber: i, open: false});
-        }
-        openWeeks.push({weeknumber: i, open: true});
-      }
+  res.status(200).json({
+    status: "success",
+    data: payments,
+  });
 
-      res.status(200).json({
-        status: "success",
-        data: openWeeks,
-      });
-
-    }
-  );
 };
+
+export const editPayment = async(req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      status: "error",
+      error: errors.array()[0].msg,
+    });
+  }
+
+  
+  const paymentId = req.body.paymentId;
+
+  const payment = await Payment.findById(paymentId);
+
+  if (!payment) {
+    return res.status(500).json({
+      status: "error",
+      error: "Payment not found",
+    });
+  }
+
+  payment.approved = true;
+  payment.adminId = req.userId;
+
+  payment.save().then((result: any) => {
+    res.status(200).json({
+      status: "Payment approved successfully",
+    });
+  });
+
+};
+
