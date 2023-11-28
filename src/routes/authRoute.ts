@@ -38,7 +38,7 @@ router.post(
     });
   }),
   body("teamId").custom(async (value: any, { req }: any) => {
-    const {status,username} = await checkTeamIdWithUserName(value as number);
+    const { status, username } = await checkTeamIdWithUserName(value as number);
     if (!status) {
       req.body.userName = username;
       return Promise.reject("Invalid Team ID");
@@ -58,7 +58,6 @@ router.post(
 
 router.post("/approve", authController.postApproveUser);
 
-
 router.get(
   "/",
   header("Authorization")
@@ -67,15 +66,13 @@ router.get(
   header("Authorization").custom((value: any, { req }: any) => {
     const token = value.split(" ")[1];
     try {
-      jwt.verify(token, process.env.JWT_SECRET as string);
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+      req.userId = decoded.userId;
       return true;
     } catch (err) {
       return false;
     }
-
-
   }),
- 
 
   authController.getAuthorizeToken
 );
