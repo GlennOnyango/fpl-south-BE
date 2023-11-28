@@ -354,77 +354,64 @@ export const postLogin = (req: any, res: any, next: any) => {
     });
 };
 
-export const postApproveUser = (req: any, res: any, next: any) => {
-  if (!req.headers.authorization) {
-    return res.status(401).json({
+export const postApproveUser = async (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
       status: "error",
-      error: "Unauthorized",
+      error: errors.array()[0].msg,
     });
   }
 
   const teamId = req.body.teamId;
+  const userId = req.userId;
+  const admin = req.admin;
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  
+  if (!admin) {
+    return res.status(401).json({
+      status: "error",
+      error: "Unauthorized user not an admin",
+    });
+  }
+  const user = await User.findByTeamId(teamId);
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
+  if (!user) {
+    return res.status(404).json({
+      status: "error",
+      error: "User not found",
+    });
+  }
 
-      if (!decoded.admin) {
-        return res.status(401).json({
-          status: "error",
-          error: "Unauthorized",
-        });
-      }
+  user.approved = true;
+  user.approved_by = new mongoose.Types.ObjectId(userId);
 
-      //
-
-      const user = await User.findByTeamId(teamId);
-
-      if (!user) {
-        return res.status(404).json({
-          status: "error",
-          error: "User not found",
-        });
-      }
-
-      user.approved = true;
-      user.approved_by = new mongoose.Types.ObjectId(decoded.userId);
-
-      const updatedUser = new User(
-        user.username,
-        user.teamid,
-        user.leagueid,
-        user.phonenumber,
-        user.email,
-        user.password,
-        user.approved,
-        user.admin,
-        user.approved_by,
-        user._id
-      );
-      const userChanges = await updatedUser.save();
-
-      if (!userChanges) {
-        return res.status(400).json({
-          status: "error",
-          error: "Error updating user",
-        });
-      }
-
-      res.status(200).json({
-        status: "success",
-        data: userChanges,
-      });
-    }
+  const updatedUser = new User(
+    user.username,
+    user.teamid,
+    user.leagueid,
+    user.phonenumber,
+    user.email,
+    user.password,
+    user.approved,
+    user.admin,
+    user.approved_by,
+    user._id
   );
+  const userChanges = await updatedUser.save();
+
+  if (!userChanges) {
+    return res.status(400).json({
+      status: "error",
+      error: "Error updating user",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: userChanges,
+  });
+
 };
 
 export const getAuthorizeToken = (req: any, res: any, next: any) => {
@@ -432,7 +419,7 @@ export const getAuthorizeToken = (req: any, res: any, next: any) => {
   if (!errors.isEmpty()) {
     return res.status(422).json({
       status: "error",
-      error: errors.array(),
+      error: errors.array()[0].msg,
     });
   }
 

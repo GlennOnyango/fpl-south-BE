@@ -1,7 +1,12 @@
 import express from "express";
 import { getMyWeeks } from "../controllers/weeksController";
+import { checkAuth } from "../middleware/authMiddleware";
 const router = express.Router();
 
+router.get(
+  "/",
+  checkAuth,
 
-router.get("/", getMyWeeks);
+  getMyWeeks
+);
 export default router;

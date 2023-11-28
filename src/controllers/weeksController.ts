@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import WeeksModel from "../models/weeksModel";
 import { updateMonthsByUserId } from "./monthsController";
+import { validationResult } from "express-validator";
 
 //get weeks using userId
 export const getWeeksByUserId = (req: any, res: any, next: any) => {
@@ -38,45 +39,31 @@ export const getWeeksByUserId = (req: any, res: any, next: any) => {
 };
 
 export const getMyWeeks = (req: any, res: any, next: any) => {
-  
-  if (!req.headers.authorization) {
-    return res.status(401).json({
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
       status: "error",
-      error: "Unauthorized",
+      error: errors.array()[0].msg,
     });
   }
 
-  const bearerToken = req.headers.authorization.split(" ")[1];
+  const userId = req.userId;
 
-  jwt.verify(
-    bearerToken,
-    process.env.JWT_SECRET as string,
-    async (err: any, decoded: any) => {
-      if (err) {
-        return res.status(401).json({
-          status: "error",
-          error: err,
-        });
-      }
-
-      WeeksModel.fetchByUserId(decoded.userId)
-        .then((weeksModelData: any) => {
-          res.status(200).json({
-            status: "success",
-            data: weeksModelData,
-          });
-        })
-        .catch((err: any) => {
-          res.status(500).json({
-            status: "error",
-            error: err,
-            source: "weeksModel",
-          });
-        });
-    }
-  );
+  WeeksModel.fetchByUserId(userId)
+    .then((weeksModelData: any) => {
+      res.status(200).json({
+        status: "success",
+        data: weeksModelData,
+      });
+    })
+    .catch((err: any) => {
+      res.status(500).json({
+        status: "error",
+        error: err,
+        source: "weeksModel",
+      });
+    });
 };
-
 
 //update weeks using userId
 export const updateWeeksByUserId = (req: any, res: any, next: any) => {

@@ -4,6 +4,7 @@ const router = express.Router();
 import * as paymentsController from "../controllers/paymentsController";
 import { body } from "express-validator";
 import Payment from "../models/paymentModel";
+import { checkAdmin, checkAuth } from "../middleware/authMiddleware";
 
 router.post(
   "/pay",
@@ -19,12 +20,13 @@ router.post(
       }
     });
   }),
+  checkAuth,
   paymentsController.postCreatePayment
 );
+router.post("/approve/", checkAdmin, paymentsController.postApprovePayment);
 
-router.get("/", paymentsController.getPayments);
-router.get("/me", paymentsController.getMyPayments);
-router.get("/:userId", paymentsController.getPaymentsByUserId);
-router.post("/approve/", paymentsController.postApprovePayment);
+router.get("/", checkAuth, paymentsController.getPayments);
+router.get("/me", checkAdmin, paymentsController.getMyPayments);
+router.get("/:userId", checkAdmin, paymentsController.getPaymentsByUserId);
 
 export default router;

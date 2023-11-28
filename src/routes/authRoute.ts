@@ -1,13 +1,13 @@
 import express from "express";
 const router = express.Router();
 
-import jwt from "jsonwebtoken";
 //Controllers
 import * as authController from "../controllers/authController";
-import { body, header } from "express-validator";
+import { body } from "express-validator";
 //models
 import User from "../models/userModel";
 import { checkTeamIdWithUserName } from "../stats/checkTeamId";
+import { checkAdmin, checkAuth } from "../middleware/authMiddleware";
 
 router.post(
   "/login",
@@ -38,7 +38,7 @@ router.post(
     });
   }),
   body("teamId").custom(async (value: any, { req }: any) => {
-    const {status,username} = await checkTeamIdWithUserName(value as number);
+    const { status, username } = await checkTeamIdWithUserName(value as number);
     if (!status) {
       req.body.userName = username;
       return Promise.reject("Invalid Team ID");
@@ -56,28 +56,8 @@ router.post(
   authController.postCreateUser
 );
 
-router.post("/approve", authController.postApproveUser);
+router.post("/approve", checkAdmin, authController.postApproveUser);
 
-
-router.get(
-  "/",
-  header("Authorization")
-    .notEmpty()
-    .withMessage("Authorization header is required"),
-  header("Authorization").custom((value: any, { req }: any) => {
-    const token = value.split(" ")[1];
-    try {
-      jwt.verify(token, process.env.JWT_SECRET as string);
-      return true;
-    } catch (err) {
-      return false;
-    }
-
-
-  }),
- 
-
-  authController.getAuthorizeToken
-);
+router.get("/", checkAuth, authController.getAuthorizeToken);
 
 export default router;
