@@ -60,4 +60,6 @@ router.post("/approve", checkAdmin, authController.postApproveUser);
 
 router.get("/", checkAuth, authController.getAuthorizeToken);
 
+router.get("/users", checkAdmin, authController.getPlayers);
+
 export default router;

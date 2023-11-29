@@ -136,6 +136,24 @@ class User {
         return err;
       });
   }
+
+  static findUsersByLeagueId(
+    leagueid: number,
+    isAdmin: boolean = false,
+    isApproved: boolean = false
+  ) {
+    const db = getDb();
+    return db
+      .collection("users")
+      .find({ leagueid: leagueid, approved: isAdmin, admin: isApproved })
+      .toArray()
+      .then((result: User[]) => {
+        return result;
+      })
+      .catch((err: Error) => {
+        return err;
+      });
+  }
 }
 
 export default User;

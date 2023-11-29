@@ -354,6 +354,35 @@ export const postLogin = (req: any, res: any, next: any) => {
     });
 };
 
+export const getPlayers = async (req: any, res: any, next: any) => {
+  const admin = req.admin;
+  const userId = req.userId;
+  const leagueId = req.body.leagueId;
+  const isApproved = req.body.isApproved;
+  const isAdmin = req.body.isAdmin;
+
+  if (!admin) {
+    return res.status(401).json({
+      status: "error",
+      error: "Unauthorized user not an admin",
+    });
+  }
+
+  const users = await User.findUsersByLeagueId(leagueId, isAdmin, isApproved);
+
+  if (!users) {
+    return res.status(404).json({
+      status: "error",
+      error: "Users not found",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: users,
+  });
+}
+
 export const postApproveUser = async (req: any, res: any, next: any) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -413,6 +442,57 @@ export const postApproveUser = async (req: any, res: any, next: any) => {
   });
 
 };
+
+export const postDisapproveUser = async (req: any, res: any, next: any) => {
+  const teamId = req.body.teamId;
+  const userId = req.userId;
+  const admin = req.admin;
+
+  
+  if (!admin) {
+    return res.status(401).json({
+      status: "error",
+      error: "Unauthorized user not an admin",
+    });
+  }
+  const user = await User.findByTeamId(teamId);
+
+  if (!user) {
+    return res.status(404).json({
+      status: "error",
+      error: "User not found",
+    });
+  }
+
+  user.approved = false;
+  user.approved_by = new mongoose.Types.ObjectId(userId);
+
+  const updatedUser = new User(
+    user.username,
+    user.teamid,
+    user.leagueid,
+    user.phonenumber,
+    user.email,
+    user.password,
+    user.approved,
+    user.admin,
+    user.approved_by,
+    user._id
+  );
+  const userChanges = await updatedUser.save();
+
+  if (!userChanges) {
+    return res.status(400).json({
+      status: "error",
+      error: "Error updating user",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: userChanges,
+  });
+}
 
 export const getAuthorizeToken = (req: any, res: any, next: any) => {
   const errors = validationResult(req);
